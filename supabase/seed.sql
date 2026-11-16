@@ -1,0 +1,10 @@
+-- Seed note: Supabase Auth users (Monica, Sujitha, Dhinesh, Kezi, Arun, George)
+-- must be created via Supabase Auth (magic link invite) rather than raw SQL,
+-- since auth.users requires the GoTrue API to set up credentials correctly.
+-- After each user signs in once, handle_new_user() creates their profile row
+-- automatically. Promote the admin afterward, e.g.:
+--
+--   update profiles set role = 'admin' where email = 'dhinesh@innoura.com';
+--
+-- Use scripts/invite-team.ts (service role key) to send invites for:
+--   Monica, Sujitha, Dhinesh, Kezi, Arun, George
