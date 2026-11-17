@@ -27,3 +27,12 @@ export async function createEvent(formData: FormData) {
   revalidatePath("/events");
   redirect(`/events/${data.id}`);
 }
+
+export async function deleteEvent(eventId: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("events").delete().eq("id", eventId);
+  if (error) throw new Error(error.message);
+  revalidatePath("/events");
+  revalidatePath("/leads");
+  revalidatePath("/leads/sir-given");
+}

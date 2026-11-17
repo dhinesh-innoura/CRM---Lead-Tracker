@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { requireUser } from "@/lib/data";
 import AddEventModal from "@/components/add-event-modal";
+import EventCard from "@/components/event-card";
 import type { LeadEvent } from "@/lib/supabase/types";
 
 export default async function EventsPage() {
@@ -25,17 +25,7 @@ export default async function EventsPage() {
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {events.map((e) => (
-            <Link
-              key={e.id}
-              href={`/events/${e.id}`}
-              className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-black/5 transition hover:ring-[var(--brand)]"
-            >
-              <p className="font-medium text-[#1c2024]">{e.name}</p>
-              <p className="mt-1 text-xs text-gray-400">
-                {e.start_date}
-                {e.end_date ? ` – ${e.end_date}` : ""}
-              </p>
-            </Link>
+            <EventCard key={e.id} event={e} />
           ))}
         </div>
       )}

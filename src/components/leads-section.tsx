@@ -7,6 +7,7 @@ import SavedFilterChip from "@/components/saved-filter-chip";
 import AddColumnForm from "@/components/add-column-form";
 import ColumnCustomizer from "@/components/column-customizer";
 import ImportModal from "@/components/import-modal";
+import AddLeadModal from "@/components/add-lead-modal";
 import FiltersPanel from "@/components/filters-panel";
 import { mergeColumnPrefs, type ColumnPref } from "@/lib/lead-columns";
 import {
@@ -163,6 +164,7 @@ export default async function LeadsSection({
       </div>
 
       <div className="flex items-center justify-end gap-2">
+        <AddLeadModal fieldDefs={fieldDefs} eventId={eventId} defaultSource={sourceFilter?.[0]} />
         {tab === tabs[0] && <ImportModal fieldDefs={fieldDefs} eventId={eventId} defaultSource={sourceFilter?.[0]} />}
         <a
           href={`/api/export/leads?ids=${exportIds}`}

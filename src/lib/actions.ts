@@ -330,6 +330,74 @@ export async function updateLeadField(leadId: string, field: string, value: stri
   revalidatePath(`/leads/${leadId}`);
 }
 
+export interface ManualLeadRow {
+  company_name: string;
+  company_website?: string;
+  about_company?: string;
+  contact_name?: string;
+  contact_linkedin_url?: string;
+  about_person?: string;
+  source?: string;
+  solutions?: string;
+  products?: string;
+  ai_synergy?: string;
+  status?: string;
+  applications?: string;
+  partners?: string;
+  annual_revenue?: string;
+  contact_email?: string;
+  priority?: string;
+  notes?: string;
+  custom_fields?: Record<string, string>;
+}
+
+export async function createLeadsManually(
+  rows: ManualLeadRow[],
+  overrides?: { defaultSource?: LeadSource; eventId?: string }
+) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const clean = (v?: string) => (v && v.trim() ? v.trim() : null);
+
+  const payloads = rows
+    .filter((r) => clean(r.company_name))
+    .map((r) => ({
+      company_name: clean(r.company_name)!,
+      company_website: clean(r.company_website),
+      about_company: clean(r.about_company),
+      contact_name: clean(r.contact_name),
+      contact_linkedin_url: clean(r.contact_linkedin_url),
+      about_person: clean(r.about_person),
+      source: overrides?.defaultSource ?? ((clean(r.source) as LeadSource) || "linkedin"),
+      solutions: clean(r.solutions),
+      products: clean(r.products),
+      ai_synergy: clean(r.ai_synergy),
+      status: (clean(r.status) as LeadStatus) ?? null,
+      applications: clean(r.applications),
+      partners: clean(r.partners),
+      annual_revenue: clean(r.annual_revenue),
+      contact_email: clean(r.contact_email),
+      priority: (clean(r.priority) as LeadPriority) ?? "medium",
+      notes: clean(r.notes),
+      custom_fields: r.custom_fields ?? {},
+      event_id: overrides?.eventId ?? null,
+      created_by: user.id,
+    }));
+
+  if (payloads.length === 0) throw new Error("At least one row needs a company name");
+
+  const { error } = await supabase.from("leads").insert(payloads);
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/leads");
+  revalidatePath("/leads/sir-given");
+  revalidatePath("/events", "layout");
+}
+
 export async function deleteLead(leadId: string) {
   const supabase = await createClient();
   const { error } = await supabase.from("leads").delete().eq("id", leadId);

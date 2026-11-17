@@ -26,7 +26,7 @@ export default async function EventDetailPage({
         heading={typedEvent.name}
         description={`${typedEvent.start_date}${typedEvent.end_date ? ` – ${typedEvent.end_date}` : ""}`}
         showSourceColumn={false}
-        tabs={["all", "active"]}
+        tabs={["new", "all", "active"]}
         eventId={id}
       />
     </div>
