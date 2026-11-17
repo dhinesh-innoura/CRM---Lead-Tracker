@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   ChevronLeft,
   ChevronRight,
@@ -42,6 +43,10 @@ export default function Sidebar({
   isAdmin: boolean;
 }) {
   const nav = NAV.filter((item) => !item.adminOnly || isAdmin);
+  const pathname = usePathname();
+  const activeHref = nav
+    .filter((item) => (item.href === "/" ? pathname === "/" : pathname === item.href || pathname.startsWith(`${item.href}/`)))
+    .sort((a, b) => b.href.length - a.href.length)[0]?.href;
   const [collapsed, setCollapsed] = useState(() => {
     try {
       return localStorage.getItem("tracker360:sidebar-collapsed") === "1";
@@ -78,19 +83,27 @@ export default function Sidebar({
         </h1>
       </div>
       <nav className="flex-1 space-y-1 px-3">
-        {nav.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            title={collapsed ? item.label : undefined}
-            className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-[var(--sidebar-foreground)] transition hover:bg-white/5 hover:text-white ${
-              collapsed ? "justify-center" : ""
-            }`}
-          >
-            <item.icon size={18} />
-            {!collapsed && item.label}
-          </Link>
-        ))}
+        {nav.map((item) => {
+          const isActive = item.href === activeHref;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              title={collapsed ? item.label : undefined}
+              aria-current={isActive ? "page" : undefined}
+              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition ${
+                collapsed ? "justify-center" : ""
+              } ${
+                isActive
+                  ? "bg-[var(--brand)] text-[#0a2a2c]"
+                  : "text-[var(--sidebar-foreground)] hover:bg-white/5 hover:text-white"
+              }`}
+            >
+              <item.icon size={18} />
+              {!collapsed && item.label}
+            </Link>
+          );
+        })}
       </nav>
       <div className="border-t border-white/10 px-4 py-4">
         {!collapsed && (
