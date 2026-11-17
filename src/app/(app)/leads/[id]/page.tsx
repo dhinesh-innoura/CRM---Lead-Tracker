@@ -6,8 +6,12 @@ import NoteForm from "@/components/note-form";
 import MeetingButton from "@/components/meeting-button";
 import ResponseButton from "@/components/response-button";
 import HoldReasonIcon from "@/components/hold-reason-icon";
+import BackButton from "@/components/back-button";
 import type { Activity, Lead, LeadFieldDef, LeadStatus, Meeting } from "@/lib/supabase/types";
 import { SOURCE_LABELS } from "@/lib/supabase/types";
+
+const FOLLOW_UP_ACTIVITY_TYPES = new Set(["status_changed"]);
+const FOLLOW_UP_STATUSES = new Set(["outreach_initiated", "follow_up"]);
 
 const ACTIVITY_LABELS: Record<string, string> = {
   lead_created: "Lead created",
@@ -44,8 +48,15 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
   const typedLead = lead as Lead;
   const hasMeeting = Boolean(meetings && meetings.length > 0);
 
+  const followUpHistory = ((activities ?? []) as Activity[]).filter(
+    (a) => FOLLOW_UP_ACTIVITY_TYPES.has(a.type) && FOLLOW_UP_STATUSES.has((a.details as { to?: string } | null)?.to ?? "")
+  );
+  const isInFollowUpFlow = FOLLOW_UP_STATUSES.has(typedLead.status);
+
   return (
     <div className="mx-auto max-w-5xl space-y-6">
+      <BackButton fallbackHref="/leads" />
+
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs font-medium text-gray-400">{typedLead.lead_code}</p>
@@ -123,6 +134,37 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
               {typedLead.response_date && (
                 <p className="mt-1 text-xs text-gray-400">{new Date(typedLead.response_date).toLocaleString()}</p>
               )}
+            </section>
+          )}
+
+          {(isInFollowUpFlow || followUpHistory.length > 0) && (
+            <section className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-black/5">
+              <h2 className="mb-3 text-sm font-semibold text-[#1c2024]">Follow-up</h2>
+              {isInFollowUpFlow && (
+                <p className="mb-3 text-sm text-gray-600">
+                  Currently <span className="font-medium text-[#1c2024]">{typedLead.status === "follow_up" ? "in Follow Up" : "waiting on the Outreach Initiated window"}</span>
+                  {typedLead.next_follow_up_date && (
+                    <>
+                      {" "}— next follow-up on <span className="font-medium text-[#1c2024]">{typedLead.next_follow_up_date}</span>
+                    </>
+                  )}
+                  .
+                </p>
+              )}
+              <ul className="space-y-2 text-sm">
+                {followUpHistory.map((a) => (
+                  <li key={a.id} className="flex items-center justify-between rounded-lg border border-gray-100 p-2">
+                    <span>
+                      Moved to{" "}
+                      <span className="font-medium text-[#1c2024]">
+                        {(a.details as { to?: string } | null)?.to === "follow_up" ? "Follow Up" : "Outreach Initiated"}
+                      </span>
+                    </span>
+                    <span className="text-xs text-gray-400">{new Date(a.created_at).toLocaleString()}</span>
+                  </li>
+                ))}
+                {followUpHistory.length === 0 && <p className="text-gray-400">No follow-up history yet.</p>}
+              </ul>
             </section>
           )}
 

@@ -13,6 +13,7 @@ export const FIXED_COLUMNS: { key: string; label: string }[] = [
   { key: "applications", label: "Applications" },
   { key: "partners", label: "Partners" },
   { key: "annual_revenue", label: "Annual Revenue" },
+  { key: "action", label: "Action" },
 ];
 
 export interface ColumnPref {

@@ -3,9 +3,17 @@
 import { useState } from "react";
 import Modal from "@/components/modal";
 import ImportClient from "@/app/(app)/import/import-client";
-import type { LeadFieldDef } from "@/lib/supabase/types";
+import type { LeadFieldDef, LeadSource } from "@/lib/supabase/types";
 
-export default function ImportModal({ fieldDefs }: { fieldDefs: LeadFieldDef[] }) {
+export default function ImportModal({
+  fieldDefs,
+  defaultSource,
+  eventId,
+}: {
+  fieldDefs: LeadFieldDef[];
+  defaultSource?: LeadSource;
+  eventId?: string;
+}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -24,7 +32,7 @@ export default function ImportModal({ fieldDefs }: { fieldDefs: LeadFieldDef[] }
           onClose={() => setOpen(false)}
           wide
         >
-          <ImportClient fieldDefs={fieldDefs} />
+          <ImportClient fieldDefs={fieldDefs} defaultSource={defaultSource} eventId={eventId} />
         </Modal>
       )}
     </>

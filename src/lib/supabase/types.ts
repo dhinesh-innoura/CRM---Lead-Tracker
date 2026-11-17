@@ -89,6 +89,8 @@ export interface Lead {
   created_at: string;
   updated_at: string;
   import_batch_id: string | null;
+  is_active_lead: boolean;
+  event_id: string | null;
 }
 
 export interface LeadFieldDef {
@@ -163,6 +165,15 @@ export interface SavedFilter {
   name: string;
   owner_id: string;
   query: Record<string, string>;
+  created_at: string;
+}
+
+export interface LeadEvent {
+  id: string;
+  name: string;
+  start_date: string;
+  end_date: string | null;
+  created_by: string | null;
   created_at: string;
 }
 

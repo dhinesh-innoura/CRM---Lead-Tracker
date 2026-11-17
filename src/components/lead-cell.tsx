@@ -3,6 +3,7 @@ import { SOURCE_LABELS, type Lead } from "@/lib/supabase/types";
 import EditableCell from "@/components/editable-cell";
 import StatusSelect from "@/components/status-select";
 import HoldReasonIcon from "@/components/hold-reason-icon";
+import ActiveToggleButton from "@/components/active-toggle-button";
 
 export default function LeadCell({ lead, columnKey }: { lead: Lead; columnKey: string }) {
   if (columnKey.startsWith("custom:")) {
@@ -72,6 +73,8 @@ export default function LeadCell({ lead, columnKey }: { lead: Lead; columnKey: s
       return <span className="text-gray-600">{lead.partners || "—"}</span>;
     case "annual_revenue":
       return <span className="text-gray-600">{lead.annual_revenue || "—"}</span>;
+    case "action":
+      return <ActiveToggleButton leadId={lead.id} isActive={lead.is_active_lead} />;
     default:
       return <span className="text-gray-400">—</span>;
   }

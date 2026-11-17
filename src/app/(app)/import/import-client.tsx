@@ -3,7 +3,7 @@
 import { useState } from "react";
 import * as XLSX from "xlsx";
 import { importLeads, type ImportResult } from "@/lib/import-actions";
-import type { LeadFieldDef } from "@/lib/supabase/types";
+import type { LeadFieldDef, LeadSource } from "@/lib/supabase/types";
 
 const FIELDS: { key: string; label: string; required?: boolean }[] = [
   { key: "company_name", label: "Company", required: true },
@@ -40,9 +40,17 @@ function guessMapping(headers: string[]) {
   return mapping;
 }
 
-export default function ImportClient({ fieldDefs = [] }: { fieldDefs?: LeadFieldDef[] }) {
+export default function ImportClient({
+  fieldDefs = [],
+  defaultSource,
+  eventId,
+}: {
+  fieldDefs?: LeadFieldDef[];
+  defaultSource?: LeadSource;
+  eventId?: string;
+}) {
   const allFields: { key: string; label: string; required?: boolean }[] = [
-    ...FIELDS,
+    ...FIELDS.filter((f) => !(defaultSource && f.key === "source")),
     ...fieldDefs.map((f) => ({ key: `custom:${f.key}`, label: f.label, required: false })),
   ];
 
@@ -74,7 +82,7 @@ export default function ImportClient({ fieldDefs = [] }: { fieldDefs?: LeadField
   async function handleImport() {
     setImporting(true);
     try {
-      const res = await importLeads(fileName, mapping, rows, onDuplicate);
+      const res = await importLeads(fileName, mapping, rows, onDuplicate, { defaultSource, eventId });
       setResult(res);
     } finally {
       setImporting(false);

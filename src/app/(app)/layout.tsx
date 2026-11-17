@@ -10,13 +10,16 @@ import {
   Bell,
   Settings,
   ScrollText,
+  CalendarRange,
 } from "lucide-react";
 import { requireUser } from "@/lib/data";
 import SignOutButton from "@/components/sign-out-button";
 
 const NAV = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard, adminOnly: false },
-  { href: "/leads", label: "Leads", icon: Users, adminOnly: false },
+  { href: "/leads", label: "Own Leads", icon: Users, adminOnly: false },
+  { href: "/leads/sir-given", label: "Assigned Leads", icon: Users, adminOnly: false },
+  { href: "/events", label: "Event Leads", icon: CalendarRange, adminOnly: false },
   { href: "/followups", label: "Follow-ups", icon: Clock, adminOnly: false },
   { href: "/responses", label: "Responses", icon: MessageSquare, adminOnly: false },
   { href: "/meetings", label: "Meetings", icon: CalendarDays, adminOnly: false },

@@ -51,6 +51,14 @@ export async function updateLeadStatus(leadId: string, status: LeadStatus) {
   revalidatePath("/");
 }
 
+export async function toggleLeadActive(leadId: string, isActive: boolean) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("leads").update({ is_active_lead: isActive }).eq("id", leadId);
+  if (error) throw new Error(error.message);
+  revalidatePath(`/leads/${leadId}`);
+  revalidatePath("/leads");
+}
+
 export async function updateLeadAssignment(leadId: string, assignedTo: string) {
   const supabase = await createClient();
   const { error } = await supabase

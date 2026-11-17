@@ -14,7 +14,7 @@ export interface ImportResult {
   errors: { row: number; message: string }[];
 }
 
-const VALID_SOURCES: LeadSource[] = ["linkedin", "prem_sir", "own"];
+const VALID_SOURCES: LeadSource[] = ["linkedin", "prem_sir", "ai"];
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -22,7 +22,8 @@ export async function importLeads(
   fileName: string,
   mapping: Record<string, string>,
   rows: ImportRow[],
-  onDuplicate: "skip" | "update"
+  onDuplicate: "skip" | "update",
+  overrides?: { defaultSource?: LeadSource; eventId?: string }
 ): Promise<ImportResult> {
   const supabase = await createClient();
   const {
@@ -68,7 +69,9 @@ export async function importLeads(
       (contactEmail ? byEmail.get(contactEmail.toLowerCase()) : undefined);
 
     const sourceRaw = get("source").toLowerCase().replace(/\s+/g, "_");
-    const source = (VALID_SOURCES.includes(sourceRaw as LeadSource) ? sourceRaw : "linkedin") as LeadSource;
+    const source =
+      overrides?.defaultSource ??
+      ((VALID_SOURCES.includes(sourceRaw as LeadSource) ? sourceRaw : "linkedin") as LeadSource);
 
     const statusRaw = get("status").toLowerCase().replace(/\s+/g, "_");
     const status = (LEAD_STATUSES.includes(statusRaw as LeadStatus) ? statusRaw : "outreach_initiated") as LeadStatus;
@@ -101,6 +104,7 @@ export async function importLeads(
         : "medium") as LeadPriority,
       notes: get("notes") || null,
       custom_fields: customFields,
+      event_id: overrides?.eventId ?? null,
     };
 
     if (existingId) {
