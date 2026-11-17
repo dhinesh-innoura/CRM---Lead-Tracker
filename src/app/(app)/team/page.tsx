@@ -40,9 +40,9 @@ export default async function TeamPage() {
         </section>
       )}
 
-      <section className="overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-black/5">
+      <section className="max-h-[70vh] overflow-auto rounded-xl bg-white shadow-sm ring-1 ring-black/5">
         <table className="w-full text-left text-sm">
-          <thead className="bg-gray-50 text-xs font-medium uppercase text-gray-500">
+          <thead className="sticky top-0 z-10 bg-gray-50 text-xs font-medium uppercase text-gray-500">
             <tr>
               <th className="px-4 py-3">Name</th>
               <th className="px-4 py-3">Email</th>

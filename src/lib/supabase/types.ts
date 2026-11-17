@@ -78,7 +78,7 @@ export interface Lead {
   source_details: string | null;
   assigned_to: string | null;
   priority: LeadPriority;
-  status: LeadStatus;
+  status: LeadStatus | null;
   last_contacted_at: string | null;
   next_follow_up_date: string | null;
   notes: string | null;

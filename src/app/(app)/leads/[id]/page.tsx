@@ -7,7 +7,7 @@ import MeetingButton from "@/components/meeting-button";
 import ResponseButton from "@/components/response-button";
 import HoldReasonIcon from "@/components/hold-reason-icon";
 import BackButton from "@/components/back-button";
-import type { Activity, Lead, LeadFieldDef, LeadStatus, Meeting } from "@/lib/supabase/types";
+import type { Activity, Lead, LeadFieldDef, Meeting } from "@/lib/supabase/types";
 import { SOURCE_LABELS } from "@/lib/supabase/types";
 
 const FOLLOW_UP_ACTIVITY_TYPES = new Set(["status_changed"]);
@@ -51,7 +51,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
   const followUpHistory = ((activities ?? []) as Activity[]).filter(
     (a) => FOLLOW_UP_ACTIVITY_TYPES.has(a.type) && FOLLOW_UP_STATUSES.has((a.details as { to?: string } | null)?.to ?? "")
   );
-  const isInFollowUpFlow = FOLLOW_UP_STATUSES.has(typedLead.status);
+  const isInFollowUpFlow = FOLLOW_UP_STATUSES.has(typedLead.status ?? "");
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -69,7 +69,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
         </div>
         <div className="flex items-center gap-2">
           <AssigneeSelect leadId={typedLead.id} assignedTo={typedLead.assigned_to} profiles={profiles} />
-          <StatusSelect leadId={typedLead.id} status={typedLead.status as LeadStatus} />
+          <StatusSelect leadId={typedLead.id} status={typedLead.status} />
           {typedLead.status === "on_hold" && <HoldReasonIcon leadId={typedLead.id} reason={typedLead.hold_reason} />}
         </div>
       </div>

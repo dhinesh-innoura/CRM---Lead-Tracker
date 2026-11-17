@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { requireUser, getProfiles } from "@/lib/data";
-import LeadsTable from "@/components/leads-table";
 import LeadsTableBulk from "@/components/leads-table-bulk";
 import SaveFilterForm from "@/components/save-filter-form";
 import SavedFilterChip from "@/components/saved-filter-chip";
@@ -173,11 +172,7 @@ export default async function LeadsSection({
         </a>
       </div>
 
-      {tab === "new" ? (
-        <LeadsTable leads={newLeadsData} columns={columns} />
-      ) : tab === "active" ? (
-        <LeadsTable leads={(activeLeadsData ?? []) as Lead[]} columns={columns} />
-      ) : (
+      {tab === "all" && (
         <div className="space-y-3">
           <FiltersPanel hasActiveFilters={Boolean(q || status || source || priority || assigned_to || from || to || sort)}>
             <div className="space-y-3">
@@ -248,8 +243,12 @@ export default async function LeadsSection({
             </div>
           </FiltersPanel>
 
-          <LeadsTableBulk leads={(allLeadsData ?? []) as Lead[]} profiles={profiles} columns={columns} />
+          <LeadsTableBulk leads={(allLeadsData ?? []) as Lead[]} columns={columns} />
         </div>
+      )}
+      {tab === "new" && <LeadsTableBulk leads={newLeadsData} columns={columns} />}
+      {tab === "active" && (
+        <LeadsTableBulk leads={(activeLeadsData ?? []) as Lead[]} columns={columns} />
       )}
     </div>
   );

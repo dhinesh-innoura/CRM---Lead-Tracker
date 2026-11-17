@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SOURCE_LABELS, type Lead } from "@/lib/supabase/types";
 import EditableCell from "@/components/editable-cell";
+import LeadFieldCell from "@/components/lead-field-cell";
 import StatusSelect from "@/components/status-select";
 import HoldReasonIcon from "@/components/hold-reason-icon";
 import ActiveToggleButton from "@/components/active-toggle-button";
@@ -14,40 +15,27 @@ export default function LeadCell({ lead, columnKey }: { lead: Lead; columnKey: s
   switch (columnKey) {
     case "company":
       return (
-        <>
-          <Link href={`/leads/${lead.id}`} className="font-medium text-[#1c2024] hover:text-[var(--brand)]">
-            {lead.company_name}
+        <div className="space-y-1">
+          <Link href={`/leads/${lead.id}`} className="block text-xs text-[var(--brand)] hover:underline">
+            View details →
           </Link>
-          {lead.company_website && (
-            <a
-              href={lead.company_website}
-              target="_blank"
-              className="block truncate text-xs text-cyan-600 hover:underline"
-            >
-              {lead.company_website}
-            </a>
-          )}
-        </>
+          <LeadFieldCell leadId={lead.id} field="company_name" initialValue={lead.company_name ?? ""} />
+          <LeadFieldCell leadId={lead.id} field="company_website" initialValue={lead.company_website ?? ""} />
+        </div>
       );
     case "about_company":
-      return <span className="line-clamp-2 text-xs text-gray-600">{lead.about_company || lead.company_description || "—"}</span>;
-    case "contact":
       return (
-        <>
-          <p className="text-gray-700">{lead.contact_name || "—"}</p>
-          {lead.contact_linkedin_url && (
-            <a
-              href={lead.contact_linkedin_url}
-              target="_blank"
-              className="block truncate text-xs text-cyan-600 hover:underline"
-            >
-              LinkedIn
-            </a>
-          )}
-        </>
+        <LeadFieldCell
+          leadId={lead.id}
+          field="about_company"
+          initialValue={lead.about_company ?? lead.company_description ?? ""}
+          multiline
+        />
       );
+    case "contact":
+      return <LeadFieldCell leadId={lead.id} field="contact_name" initialValue={lead.contact_name ?? ""} />;
     case "about_person":
-      return <span className="line-clamp-2 text-xs text-gray-600">{lead.about_person || "—"}</span>;
+      return <LeadFieldCell leadId={lead.id} field="about_person" initialValue={lead.about_person ?? ""} multiline />;
     case "source":
       return (
         <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
@@ -55,11 +43,18 @@ export default function LeadCell({ lead, columnKey }: { lead: Lead; columnKey: s
         </span>
       );
     case "solutions":
-      return <span className="text-gray-600">{lead.solutions || "—"}</span>;
+      return <LeadFieldCell leadId={lead.id} field="solutions" initialValue={lead.solutions ?? ""} />;
     case "products":
-      return <span className="text-gray-600">{lead.products || "—"}</span>;
+      return <LeadFieldCell leadId={lead.id} field="products" initialValue={lead.products ?? ""} />;
     case "ai_synergy":
-      return <span className="line-clamp-2 text-xs text-gray-600">{lead.ai_synergy || lead.potential_opportunity || "—"}</span>;
+      return (
+        <LeadFieldCell
+          leadId={lead.id}
+          field="ai_synergy"
+          initialValue={lead.ai_synergy ?? lead.potential_opportunity ?? ""}
+          multiline
+        />
+      );
     case "status":
       return (
         <div className="flex items-center">
@@ -68,11 +63,11 @@ export default function LeadCell({ lead, columnKey }: { lead: Lead; columnKey: s
         </div>
       );
     case "applications":
-      return <span className="text-gray-600">{lead.applications || "—"}</span>;
+      return <LeadFieldCell leadId={lead.id} field="applications" initialValue={lead.applications ?? ""} />;
     case "partners":
-      return <span className="text-gray-600">{lead.partners || "—"}</span>;
+      return <LeadFieldCell leadId={lead.id} field="partners" initialValue={lead.partners ?? ""} />;
     case "annual_revenue":
-      return <span className="text-gray-600">{lead.annual_revenue || "—"}</span>;
+      return <LeadFieldCell leadId={lead.id} field="annual_revenue" initialValue={lead.annual_revenue ?? ""} />;
     case "action":
       return <ActiveToggleButton leadId={lead.id} isActive={lead.is_active_lead} />;
     default:

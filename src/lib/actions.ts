@@ -305,6 +305,50 @@ export async function updateLeadCustomField(leadId: string, key: string, value: 
   revalidatePath("/leads");
 }
 
+const EDITABLE_LEAD_FIELDS = new Set([
+  "company_name",
+  "company_website",
+  "about_company",
+  "contact_name",
+  "contact_linkedin_url",
+  "about_person",
+  "solutions",
+  "products",
+  "ai_synergy",
+  "applications",
+  "partners",
+  "annual_revenue",
+]);
+
+export async function updateLeadField(leadId: string, field: string, value: string) {
+  if (!EDITABLE_LEAD_FIELDS.has(field)) throw new Error("Field is not editable");
+  const supabase = await createClient();
+  const { error } = await supabase.from("leads").update({ [field]: value }).eq("id", leadId);
+  if (error) throw new Error(error.message);
+  revalidatePath("/leads");
+  revalidatePath("/leads/sir-given");
+  revalidatePath(`/leads/${leadId}`);
+}
+
+export async function deleteLead(leadId: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("leads").delete().eq("id", leadId);
+  if (error) throw new Error(error.message);
+  revalidatePath("/leads");
+  revalidatePath("/leads/sir-given");
+  revalidatePath("/events", "layout");
+}
+
+export async function deleteLeads(leadIds: string[]) {
+  if (leadIds.length === 0) return;
+  const supabase = await createClient();
+  const { error } = await supabase.from("leads").delete().in("id", leadIds);
+  if (error) throw new Error(error.message);
+  revalidatePath("/leads");
+  revalidatePath("/leads/sir-given");
+  revalidatePath("/events", "layout");
+}
+
 export async function markAllNotificationsRead() {
   const supabase = await createClient();
   const {

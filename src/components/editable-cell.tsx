@@ -19,13 +19,14 @@ export default function EditableCell({
     <input
       value={value}
       disabled={isPending}
+      placeholder="--"
       onChange={(e) => setValue(e.target.value)}
       onBlur={() => {
         if (value !== initialValue) {
           startTransition(() => updateLeadCustomField(leadId, fieldKey, value));
         }
       }}
-      className="w-full min-w-[120px] rounded border border-transparent bg-transparent px-1 py-0.5 text-sm text-gray-700 hover:border-gray-200 focus:border-[var(--brand)] focus:bg-white focus:outline-none"
+      className="w-full min-w-[160px] rounded-lg border border-transparent bg-transparent px-2 py-1.5 text-sm leading-snug text-gray-700 hover:border-gray-200 focus:min-w-[220px] focus:border-[var(--brand)] focus:bg-white focus:shadow-sm focus:outline-none"
     />
   );
 }

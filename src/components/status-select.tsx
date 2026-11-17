@@ -7,7 +7,7 @@ import MeetingDetailsModal from "@/components/meeting-details-modal";
 import QuickResponseModal from "@/components/quick-response-modal";
 import HoldReasonModal from "@/components/hold-reason-modal";
 
-export default function StatusSelect({ leadId, status }: { leadId: string; status: LeadStatus }) {
+export default function StatusSelect({ leadId, status }: { leadId: string; status: LeadStatus | null }) {
   const [isPending, startTransition] = useTransition();
   const [pendingModal, setPendingModal] = useState<LeadStatus | null>(null);
 
@@ -22,11 +22,16 @@ export default function StatusSelect({ leadId, status }: { leadId: string; statu
   return (
     <>
       <select
-        value={status}
+        value={status ?? ""}
         disabled={isPending}
         onChange={(e) => handleChange(e.target.value as LeadStatus)}
         className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-[#1c2024] disabled:opacity-60"
       >
+        {!status && (
+          <option value="" disabled hidden>
+            Status
+          </option>
+        )}
         {LEAD_STATUSES.map((s) => (
           <option key={s} value={s}>
             {STATUS_LABELS[s]}

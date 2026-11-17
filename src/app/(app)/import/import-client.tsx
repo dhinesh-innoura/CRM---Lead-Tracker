@@ -89,6 +89,18 @@ export default function ImportClient({
     }
   }
 
+  function removeAllRows() {
+    setFileName("");
+    setHeaders([]);
+    setRows([]);
+    setMapping({});
+    setResult(null);
+  }
+
+  function removeRow(index: number) {
+    setRows((prev) => prev.filter((_, i) => i !== index));
+  }
+
   return (
     <div className="space-y-6">
       <section className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-black/5">
@@ -136,26 +148,43 @@ export default function ImportClient({
 
       {rows.length > 0 && (
         <section className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-black/5">
-          <h2 className="mb-3 text-sm font-semibold text-[#1c2024]">3. Preview (first 5 rows)</h2>
-          <div className="overflow-x-auto">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-[#1c2024]">3. Preview ({rows.length} rows)</h2>
+            <button
+              onClick={removeAllRows}
+              className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
+            >
+              Remove All
+            </button>
+          </div>
+          <div className="max-h-[50vh] overflow-auto">
             <table className="w-full text-left text-xs">
-              <thead className="text-gray-500">
+              <thead className="sticky top-0 z-10 bg-white text-gray-500">
                 <tr>
                   {allFields.filter((f) => mapping[f.key]).map((f) => (
                     <th key={f.key} className="px-2 py-1">
                       {f.label}
                     </th>
                   ))}
+                  <th className="px-2 py-1"></th>
                 </tr>
               </thead>
               <tbody>
-                {rows.slice(0, 5).map((r, i) => (
+                {rows.map((r, i) => (
                   <tr key={i} className="border-t border-gray-100">
                     {allFields.filter((f) => mapping[f.key]).map((f) => (
                       <td key={f.key} className="px-2 py-1 text-gray-700">
                         {r[mapping[f.key]]}
                       </td>
                     ))}
+                    <td className="px-2 py-1">
+                      <button
+                        onClick={() => removeRow(i)}
+                        className="text-xs font-medium text-red-500 hover:underline"
+                      >
+                        Remove
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>

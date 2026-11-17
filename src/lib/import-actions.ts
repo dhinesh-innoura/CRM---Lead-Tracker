@@ -74,7 +74,7 @@ export async function importLeads(
       ((VALID_SOURCES.includes(sourceRaw as LeadSource) ? sourceRaw : "linkedin") as LeadSource);
 
     const statusRaw = get("status").toLowerCase().replace(/\s+/g, "_");
-    const status = (LEAD_STATUSES.includes(statusRaw as LeadStatus) ? statusRaw : "outreach_initiated") as LeadStatus;
+    const status = (LEAD_STATUSES.includes(statusRaw as LeadStatus) ? statusRaw : null) as LeadStatus | null;
 
     const customFields: Record<string, string> = {};
     for (const key of customFieldKeys) {

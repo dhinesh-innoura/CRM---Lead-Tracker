@@ -12,7 +12,7 @@ export default async function SirGivenLeadsPage({
       heading="Assigned Leads"
       description="Leads assigned by Prem Sir."
       showSourceColumn={false}
-      tabs={["new", "all", "active"]}
+      tabs={["all", "active"]}
       sourceFilter={["prem_sir"]}
     />
   );
