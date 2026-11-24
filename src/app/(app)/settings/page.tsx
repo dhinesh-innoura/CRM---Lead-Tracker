@@ -21,7 +21,7 @@ export default async function SettingsPage() {
           </div>
           <div>
             <dt className="text-xs font-medium text-gray-400">Role</dt>
-            <dd className="text-[#1c2024]">{profile?.role === "admin" ? "Admin" : "BDO"}</dd>
+            <dd className="text-[#1c2024]">BDO</dd>
           </div>
         </dl>
       </div>

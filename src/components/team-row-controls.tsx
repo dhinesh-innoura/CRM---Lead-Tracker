@@ -10,7 +10,7 @@ export default function TeamRowControls({ profile }: { profile: Profile }) {
   return (
     <div className="flex items-center gap-2">
       <select
-        defaultValue={profile.role}
+        defaultValue={profile.role === "admin" ? "bdo" : profile.role}
         disabled={isPending}
         onChange={(e) =>
           startTransition(() => setTeamMemberRole(profile.id, e.target.value as UserRole))
@@ -18,7 +18,6 @@ export default function TeamRowControls({ profile }: { profile: Profile }) {
         className="rounded-lg border border-gray-300 px-2 py-1 text-xs"
       >
         <option value="bdo">BDO</option>
-        <option value="admin">Admin</option>
       </select>
       <button
         disabled={isPending}

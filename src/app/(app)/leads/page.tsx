@@ -10,10 +10,10 @@ export default async function OwnLeadsPage({
       searchParams={searchParams}
       basePath="/leads"
       heading="Own Leads"
-      description="Leads sourced directly by the team (LinkedIn, AI)."
-      showSourceColumn={false}
+      description="Leads owned by you (created or sourced directly)."
+      showSourceColumn={true}
       tabs={["new", "all", "active"]}
-      sourceFilter={["linkedin", "ai"]}
+      viewMode="own"
     />
   );
 }

@@ -8,16 +8,24 @@ export default function AssigneeSelect({
   leadId,
   assignedTo,
   profiles,
+  assignedToName,
 }: {
   leadId: string;
   assignedTo: string | null;
   profiles: Profile[];
+  assignedToName?: string;
 }) {
   const [isPending, startTransition] = useTransition();
 
+  // If the lead was previously assigned to an admin account ID that is no longer in the dropdown,
+  // resolve by full name to the active user profile so the dropdown selects it correctly.
+  const matched =
+    profiles.find((p) => p.id === assignedTo) ??
+    (assignedToName ? profiles.find((p) => p.full_name.toLowerCase() === assignedToName.toLowerCase()) : undefined);
+
   return (
     <select
-      defaultValue={assignedTo ?? ""}
+      defaultValue={matched ? matched.id : ""}
       disabled={isPending}
       onChange={(e) =>
         startTransition(() => {

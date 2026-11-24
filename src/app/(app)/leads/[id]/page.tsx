@@ -1,5 +1,6 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { requireUser, getProfiles } from "@/lib/data";
+import { requireUser, getProfiles, getAllProfilesMap } from "@/lib/data";
 import StatusSelect from "@/components/status-select";
 import AssigneeSelect from "@/components/assignee-select";
 import NoteForm from "@/components/note-form";
@@ -33,18 +34,23 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
   const { id } = await params;
   const { supabase } = await requireUser();
   const profiles = await getProfiles();
+  const allProfilesMap = await getAllProfilesMap();
 
   const { data: lead } = await supabase.from("leads").select("*").eq("id", id).single();
   if (!lead) notFound();
 
-  const [{ data: activities }, { data: meetings }, { data: fieldDefsData }] = await Promise.all([
-    supabase.from("activities").select("*").eq("lead_id", id).order("created_at", { ascending: false }),
-    supabase.from("meetings").select("*").eq("lead_id", id).order("meeting_date", { ascending: false }),
-    supabase.from("lead_field_defs").select("*").order("position", { ascending: true }),
-  ]);
+  const [{ data: activities }, { data: meetings }, { data: fieldDefsData }, { data: eventLeadsData }] =
+    await Promise.all([
+      supabase.from("activities").select("*").eq("lead_id", id).order("created_at", { ascending: false }),
+      supabase.from("meetings").select("*").eq("lead_id", id).order("meeting_date", { ascending: false }),
+      supabase.from("lead_field_defs").select("*").order("position", { ascending: true }),
+      supabase.from("event_leads").select("events(id, name)").eq("lead_id", id),
+    ]);
   const fieldDefs = (fieldDefsData ?? []) as LeadFieldDef[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const linkedEvents = (eventLeadsData ?? []).map((el: any) => el.events).filter(Boolean);
 
-  const profileMap = new Map(profiles.map((p) => [p.id, p.full_name]));
+  const profileMap = allProfilesMap;
   const typedLead = lead as Lead;
   const hasMeeting = Boolean(meetings && meetings.length > 0);
 
@@ -68,7 +74,12 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
           )}
         </div>
         <div className="flex items-center gap-2">
-          <AssigneeSelect leadId={typedLead.id} assignedTo={typedLead.assigned_to} profiles={profiles} />
+          <AssigneeSelect
+            leadId={typedLead.id}
+            assignedTo={typedLead.assigned_to}
+            assignedToName={typedLead.assigned_to ? profileMap.get(typedLead.assigned_to) : undefined}
+            profiles={profiles}
+          />
           <StatusSelect leadId={typedLead.id} status={typedLead.status} />
           {typedLead.status === "on_hold" && <HoldReasonIcon leadId={typedLead.id} reason={typedLead.hold_reason} />}
         </div>
@@ -102,6 +113,43 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
           <section className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-black/5">
             <h2 className="mb-3 text-sm font-semibold text-[#1c2024]">Lead Tracking</h2>
             <dl className="space-y-2 text-sm">
+              <Field
+                label="Original Owner"
+                value={profileMap.get(typedLead.owner_id ?? typedLead.created_by ?? "") ?? "—"}
+              />
+              <Field
+                label="Current Assigned BDO"
+                value={
+                  typedLead.assigned_to
+                    ? profileMap.get(typedLead.assigned_to) ?? "Assigned"
+                    : "Unassigned"
+                }
+              />
+              {typedLead.assigned_by && (
+                <Field
+                  label="Assigned By"
+                  value={profileMap.get(typedLead.assigned_by) ?? "—"}
+                />
+              )}
+              {typedLead.assigned_at && (
+                <Field label="Assigned At" value={new Date(typedLead.assigned_at).toLocaleDateString()} />
+              )}
+              {linkedEvents.length > 0 && (
+                <div>
+                  <dt className="text-xs font-medium text-gray-400">Events</dt>
+                  <dd className="mt-1 flex flex-wrap gap-1">
+                    {linkedEvents.map((ev: { id: string; name: string }) => (
+                      <Link
+                        key={ev.id}
+                        href={`/events/${ev.id}`}
+                        className="rounded bg-cyan-50 px-2 py-0.5 text-xs font-medium text-[#0a2a2c] ring-1 ring-cyan-200 hover:bg-cyan-100"
+                      >
+                        {ev.name}
+                      </Link>
+                    ))}
+                  </dd>
+                </div>
+              )}
               <Field label="Source" value={SOURCE_LABELS[typedLead.source] ?? typedLead.source} />
               <Field label="Priority" value={typedLead.priority} />
               <Field label="Last Contacted" value={typedLead.last_contacted_at?.slice(0, 10)} />

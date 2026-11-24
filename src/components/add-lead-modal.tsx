@@ -118,6 +118,26 @@ export default function AddLeadModal({
                     />
                   </div>
 
+                  <div>
+                    <label className={labelClass}>Country</label>
+                    <input
+                      value={row.country ?? ""}
+                      onChange={(e) => updateRow(i, "country", e.target.value)}
+                      className={inputClass}
+                      placeholder="e.g. Singapore, UAE"
+                    />
+                  </div>
+
+                  <div>
+                    <label className={labelClass}>Industry</label>
+                    <input
+                      value={row.industry ?? ""}
+                      onChange={(e) => updateRow(i, "industry", e.target.value)}
+                      className={inputClass}
+                      placeholder="e.g. Security, Retail"
+                    />
+                  </div>
+
                   <div className="sm:col-span-2">
                     <label className={labelClass}>About Company</label>
                     <textarea

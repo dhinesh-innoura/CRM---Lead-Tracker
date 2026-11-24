@@ -1,5 +1,5 @@
 import { requireUser } from "@/lib/data";
-import type { Lead } from "@/lib/supabase/types";
+import { ACTIVE_PIPELINE_STATUSES, type Lead } from "@/lib/supabase/types";
 import Link from "next/link";
 
 function Kpi({ label, value, href }: { label: string; value: number; href?: string }) {
@@ -13,22 +13,34 @@ function Kpi({ label, value, href }: { label: string; value: number; href?: stri
 }
 
 export default async function DashboardPage() {
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
 
-  const { data: leads } = await supabase
-    .from("leads")
-    .select("id, company_name, status, source, event_id, is_active_lead, next_follow_up_date");
+  const [{ data: leads }, { data: eventLeadsData }] = await Promise.all([
+    supabase
+      .from("leads")
+      .select("id, company_name, status, source, owner_id, created_by, assigned_to, event_id, is_active_lead, next_follow_up_date"),
+    supabase.from("event_leads").select("lead_id"),
+  ]);
 
-  const all = (leads ?? []) as Lead[];
+  const all = (leads ?? []) as (Lead & { owner_id?: string | null })[];
   const today = new Date().toISOString().slice(0, 10);
 
-  const ownLeads = all.filter((l) => l.source === "linkedin" || l.source === "ai");
-  const assignedLeads = all.filter((l) => l.source === "prem_sir");
-  const eventLeads = all.filter((l) => l.event_id);
-  const activeLeads = all.filter((l) => l.is_active_lead);
+  const eventLeadIdSet = new Set((eventLeadsData ?? []).map((r) => r.lead_id));
+
+  // Centralized ownership & assignment logic matching CRM rules
+  const ownLeads = all.filter(
+    (l) => l.owner_id === user.id || (!l.owner_id && l.created_by === user.id)
+  );
+  const assignedLeads = all.filter((l) => l.assigned_to === user.id);
+  const eventLeads = all.filter((l) => l.event_id || eventLeadIdSet.has(l.id));
+  const activeLeads = all.filter(
+    (l) => l.is_active_lead || (l.status && ACTIVE_PIPELINE_STATUSES.includes(l.status))
+  );
   const dueToday = all.filter((l) => l.next_follow_up_date === today);
   const overdue = all.filter((l) => l.next_follow_up_date && l.next_follow_up_date < today);
-  const meetingsScheduled = all.filter((l) => l.status === "meeting_scheduled" || l.status === "meeting_rescheduled");
+  const meetingsScheduled = all.filter(
+    (l) => l.status === "meeting_scheduled" || l.status === "meeting_rescheduled"
+  );
   const converted = all.filter((l) => l.status === "successfully_converted");
 
   const kpis = [

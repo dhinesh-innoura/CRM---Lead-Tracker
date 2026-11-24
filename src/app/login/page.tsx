@@ -25,13 +25,27 @@ export default function LoginPage() {
     setError(null);
 
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({
+    let res = await supabase.auth.signInWithPassword({
       email,
       password: SHARED_PASSWORD,
     });
 
-    if (error) {
-      setError(error.message);
+    // If initial attempt fails and member had a .user account, try alternate email
+    if (res.error && (name === "Dhinesh" || name === "Sujitha")) {
+      const altEmail = email.includes(".user@")
+        ? email.replace(".user@", "@")
+        : email.replace("@", ".user@");
+      const fallback = await supabase.auth.signInWithPassword({
+        email: altEmail,
+        password: SHARED_PASSWORD,
+      });
+      if (!fallback.error) {
+        res = fallback;
+      }
+    }
+
+    if (res.error) {
+      setError(res.error.message);
       setSigningInAs(null);
       return;
     }

@@ -17,6 +17,15 @@ export default async function EventDetailPage({
   if (!event) notFound();
   const typedEvent = event as LeadEvent;
 
+  const eventDates = [typedEvent.start_date, typedEvent.end_date].filter(Boolean).join(" – ");
+  const descriptionParts = [
+    typedEvent.location ? `📍 ${typedEvent.location}` : null,
+    eventDates,
+    typedEvent.description,
+  ]
+    .filter(Boolean)
+    .join(" • ");
+
   return (
     <div className="space-y-4">
       <BackLink href="/events" label="Back to Events" />
@@ -24,9 +33,10 @@ export default async function EventDetailPage({
         searchParams={searchParams}
         basePath={`/events/${id}`}
         heading={typedEvent.name}
-        description={`${typedEvent.start_date}${typedEvent.end_date ? ` – ${typedEvent.end_date}` : ""}`}
-        showSourceColumn={false}
+        description={descriptionParts || "Event Leads"}
+        showSourceColumn={true}
         tabs={["new", "all", "active"]}
+        viewMode="event"
         eventId={id}
       />
     </div>

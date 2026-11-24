@@ -12,14 +12,23 @@ export async function createEvent(formData: FormData) {
   if (!user) redirect("/login");
 
   const name = String(formData.get("name") ?? "").trim();
+  const location = formData.get("location") ? String(formData.get("location")).trim() : null;
   const startDate = String(formData.get("start_date") ?? "");
   const endDate = formData.get("end_date") ? String(formData.get("end_date")) : null;
+  const description = formData.get("description") ? String(formData.get("description")).trim() : null;
 
   if (!name || !startDate) throw new Error("Event name and start date are required");
 
   const { data, error } = await supabase
     .from("events")
-    .insert({ name, start_date: startDate, end_date: endDate, created_by: user.id })
+    .insert({
+      name,
+      location,
+      start_date: startDate,
+      end_date: endDate,
+      description,
+      created_by: user.id,
+    })
     .select("id")
     .single();
   if (error) throw new Error(error.message);

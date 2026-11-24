@@ -6,16 +6,27 @@ export default async function ReportsPage() {
   const { supabase } = await requireAdminPage();
   const profiles = await getProfiles();
 
-  const { data: leads } = await supabase.from("leads").select("*");
-  const { data: meetings } = await supabase.from("meetings").select("id, created_by");
+  const [{ data: leads }, { data: meetings }, { data: rawProfiles }] = await Promise.all([
+    supabase.from("leads").select("*"),
+    supabase.from("meetings").select("id, created_by"),
+    supabase.from("profiles").select("id, full_name"),
+  ]);
 
   const allLeads = (leads ?? []) as Lead[];
+  const nameToIds = new Map<string, Set<string>>();
+  for (const p of (rawProfiles ?? [])) {
+    const key = p.full_name.toLowerCase().trim();
+    const ids = nameToIds.get(key) ?? new Set<string>();
+    ids.add(p.id);
+    nameToIds.set(key, ids);
+  }
 
   const rows = profiles.map((p) => {
-    const assigned = allLeads.filter((l) => l.assigned_to === p.id);
+    const ids = nameToIds.get(p.full_name.toLowerCase().trim()) ?? new Set([p.id]);
+    const assigned = allLeads.filter((l) => l.assigned_to && ids.has(l.assigned_to));
     const outreachSent = assigned.length;
     const responded = assigned.filter((l) => l.status === "response_received").length;
-    const meetingsBooked = (meetings ?? []).filter((m) => m.created_by === p.id).length;
+    const meetingsBooked = (meetings ?? []).filter((m) => m.created_by && ids.has(m.created_by)).length;
     const converted = assigned.filter((l) => l.status === "successfully_converted").length;
     const overdue = assigned.filter(
       (l) => l.next_follow_up_date && l.next_follow_up_date < new Date().toISOString().slice(0, 10)

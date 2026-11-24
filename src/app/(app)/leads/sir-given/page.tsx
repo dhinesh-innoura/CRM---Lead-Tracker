@@ -1,6 +1,6 @@
 import LeadsSection, { type LeadsSectionSearchParams } from "@/components/leads-section";
 
-export default async function SirGivenLeadsPage({
+export default async function AssignedLeadsPage({
   searchParams,
 }: {
   searchParams: Promise<LeadsSectionSearchParams>;
@@ -10,10 +10,10 @@ export default async function SirGivenLeadsPage({
       searchParams={searchParams}
       basePath="/leads/sir-given"
       heading="Assigned Leads"
-      description="Leads assigned by Prem Sir."
-      showSourceColumn={false}
+      description="Leads assigned to you for outreach, follow-up, and conversion."
+      showSourceColumn={true}
       tabs={["all", "active"]}
-      sourceFilter={["prem_sir"]}
+      viewMode="assigned"
     />
   );
 }

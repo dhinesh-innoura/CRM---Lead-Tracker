@@ -1,12 +1,19 @@
 export type UserRole = "admin" | "bdo";
 
 export type LeadStatus =
+  | "new"
   | "outreach_initiated"
+  | "contacted"
   | "follow_up"
+  | "interested"
   | "meeting_scheduled"
   | "response_received"
   | "no_response"
   | "meeting_completed"
+  | "demo_scheduled"
+  | "demo_completed"
+  | "proposal_sent"
+  | "negotiation"
   | "successfully_converted"
   | "meeting_rescheduled"
   | "on_hold";
@@ -76,7 +83,10 @@ export interface Lead {
   contact_linkedin_url: string | null;
   source: LeadSource;
   source_details: string | null;
+  owner_id: string | null;
   assigned_to: string | null;
+  assigned_by: string | null;
+  assigned_at: string | null;
   priority: LeadPriority;
   status: LeadStatus | null;
   last_contacted_at: string | null;
@@ -171,22 +181,54 @@ export interface SavedFilter {
 export interface LeadEvent {
   id: string;
   name: string;
+  location: string | null;
   start_date: string;
   end_date: string | null;
+  description: string | null;
   created_by: string | null;
+  created_at: string;
+  lead_count?: number;
+}
+
+export interface EventLead {
+  id: string;
+  event_id: string;
+  lead_id: string;
   created_at: string;
 }
 
 export const LEAD_STATUSES: LeadStatus[] = [
+  "new",
+  "contacted",
   "outreach_initiated",
   "follow_up",
+  "interested",
   "meeting_scheduled",
+  "meeting_completed",
+  "demo_scheduled",
+  "demo_completed",
+  "proposal_sent",
+  "negotiation",
   "response_received",
   "no_response",
-  "meeting_completed",
-  "successfully_converted",
   "meeting_rescheduled",
   "on_hold",
+  "successfully_converted",
+];
+
+// Active pipeline statuses (for Active Leads tabs in Own Leads, Assigned Leads, and Event Leads)
+export const ACTIVE_PIPELINE_STATUSES: LeadStatus[] = [
+  "contacted",
+  "interested",
+  "meeting_scheduled",
+  "meeting_completed",
+  "demo_scheduled",
+  "demo_completed",
+  "proposal_sent",
+  "negotiation",
+  "outreach_initiated",
+  "follow_up",
+  "response_received",
 ];
 
 // Statuses that need a structured modal before committing, rather than a
@@ -202,6 +244,9 @@ export const LEAD_SOURCES: { value: LeadSource; label: string }[] = [
   { value: "linkedin", label: "LinkedIn" },
   { value: "prem_sir", label: "Prem Sir" },
   { value: "ai", label: "AI" },
+  { value: "event_exhibition", label: "Event / Exhibition" },
+  { value: "own", label: "Own" },
+  { value: "other", label: "Other" },
 ];
 
 export const SOURCE_LABELS: Record<string, string> = {
@@ -220,12 +265,19 @@ export const SOURCE_LABELS: Record<string, string> = {
 };
 
 export const STATUS_LABELS: Record<LeadStatus, string> = {
+  new: "New",
+  contacted: "Contacted",
   outreach_initiated: "Outreach Initiated",
   follow_up: "Follow Up",
+  interested: "Interested",
   meeting_scheduled: "Meeting Scheduled",
+  meeting_completed: "Meeting Completed",
+  demo_scheduled: "Demo Scheduled",
+  demo_completed: "Demo Completed",
+  proposal_sent: "Proposal Sent",
+  negotiation: "Negotiation",
   response_received: "Response Received",
   no_response: "No Response",
-  meeting_completed: "Meeting Completed",
   successfully_converted: "Successfully Converted",
   meeting_rescheduled: "Meeting Rescheduled",
   on_hold: "On Hold",

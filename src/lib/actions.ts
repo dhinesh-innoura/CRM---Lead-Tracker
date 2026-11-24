@@ -12,8 +12,12 @@ export async function createLead(formData: FormData) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  const companyName = String(formData.get("company_name") ?? "").trim();
+  const assignedTo = formData.get("assigned_to") ? String(formData.get("assigned_to")) : null;
+  const eventId = formData.get("event_id") ? String(formData.get("event_id")) : null;
+
   const payload = {
-    company_name: String(formData.get("company_name") ?? ""),
+    company_name: companyName,
     company_website: formData.get("company_website") || null,
     industry: formData.get("industry") || null,
     country: formData.get("country") || null,
@@ -28,16 +32,27 @@ export async function createLead(formData: FormData) {
     contact_linkedin_url: formData.get("contact_linkedin_url") || null,
     source: (formData.get("source") as LeadSource) || "other",
     source_details: formData.get("source_details") || null,
-    assigned_to: formData.get("assigned_to") || null,
-    priority: (formData.get("priority") as LeadPriority) || "medium",
-    notes: formData.get("notes") || null,
+    owner_id: user.id,
     created_by: user.id,
+    assigned_to: assignedTo,
+    assigned_by: assignedTo ? user.id : null,
+    assigned_at: assignedTo ? new Date().toISOString() : null,
+    priority: (formData.get("priority") as LeadPriority) || "medium",
+    status: (formData.get("status") as LeadStatus) || "new",
+    notes: formData.get("notes") || null,
+    event_id: eventId || null,
   };
 
   const { data, error } = await supabase.from("leads").insert(payload).select("id").single();
   if (error) throw new Error(error.message);
 
+  if (eventId && data?.id) {
+    await supabase.from("event_leads").insert({ event_id: eventId, lead_id: data.id });
+  }
+
   revalidatePath("/leads");
+  revalidatePath("/leads/sir-given");
+  revalidatePath("/events", "layout");
   revalidatePath("/");
   redirect(`/leads/${data.id}`);
 }
@@ -61,13 +76,25 @@ export async function toggleLeadActive(leadId: string, isActive: boolean) {
 
 export async function updateLeadAssignment(leadId: string, assignedTo: string) {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const updates: Record<string, unknown> = {
+    assigned_to: assignedTo || null,
+    assigned_by: assignedTo && user ? user.id : null,
+    assigned_at: assignedTo ? new Date().toISOString() : null,
+  };
+
   const { error } = await supabase
     .from("leads")
-    .update({ assigned_to: assignedTo || null })
+    .update(updates)
     .eq("id", leadId);
   if (error) throw new Error(error.message);
   revalidatePath(`/leads/${leadId}`);
   revalidatePath("/leads");
+  revalidatePath("/leads/sir-given");
+  revalidatePath("/events", "layout");
 }
 
 export async function addNote(leadId: string, note: string) {
@@ -308,6 +335,9 @@ export async function updateLeadCustomField(leadId: string, key: string, value: 
 const EDITABLE_LEAD_FIELDS = new Set([
   "company_name",
   "company_website",
+  "industry",
+  "country",
+  "location",
   "about_company",
   "contact_name",
   "contact_linkedin_url",
@@ -333,6 +363,9 @@ export async function updateLeadField(leadId: string, field: string, value: stri
 export interface ManualLeadRow {
   company_name: string;
   company_website?: string;
+  industry?: string;
+  country?: string;
+  location?: string;
   about_company?: string;
   contact_name?: string;
   contact_linkedin_url?: string;
@@ -368,6 +401,9 @@ export async function createLeadsManually(
     .map((r) => ({
       company_name: clean(r.company_name)!,
       company_website: clean(r.company_website),
+      industry: clean(r.industry),
+      country: clean(r.country),
+      location: clean(r.location),
       about_company: clean(r.about_company),
       contact_name: clean(r.contact_name),
       contact_linkedin_url: clean(r.contact_linkedin_url),
@@ -376,7 +412,7 @@ export async function createLeadsManually(
       solutions: clean(r.solutions),
       products: clean(r.products),
       ai_synergy: clean(r.ai_synergy),
-      status: (clean(r.status) as LeadStatus) ?? null,
+      status: (clean(r.status) as LeadStatus) ?? "new",
       applications: clean(r.applications),
       partners: clean(r.partners),
       annual_revenue: clean(r.annual_revenue),
@@ -385,13 +421,22 @@ export async function createLeadsManually(
       notes: clean(r.notes),
       custom_fields: r.custom_fields ?? {},
       event_id: overrides?.eventId ?? null,
+      owner_id: user.id,
       created_by: user.id,
     }));
 
   if (payloads.length === 0) throw new Error("At least one row needs a company name");
 
-  const { error } = await supabase.from("leads").insert(payloads);
+  const { data: inserted, error } = await supabase.from("leads").insert(payloads).select("id");
   if (error) throw new Error(error.message);
+
+  if (overrides?.eventId && inserted && inserted.length > 0) {
+    const elPayloads = inserted.map((row) => ({
+      event_id: overrides.eventId!,
+      lead_id: row.id,
+    }));
+    await supabase.from("event_leads").insert(elPayloads).select();
+  }
 
   revalidatePath("/leads");
   revalidatePath("/leads/sir-given");

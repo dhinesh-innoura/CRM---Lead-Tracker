@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireAdminPage } from "@/lib/require-admin";
-import { getProfiles } from "@/lib/data";
+import { getProfiles, getAllProfilesMap } from "@/lib/data";
 import type { Activity } from "@/lib/supabase/types";
 
 const ACTIVITY_LABELS: Record<string, string> = {
@@ -26,8 +26,8 @@ export default async function AuditLogPage({
 }) {
   const { supabase } = await requireAdminPage();
   const profiles = await getProfiles();
+  const profileMap = await getAllProfilesMap();
   const { actor } = await searchParams;
-  const profileMap = new Map(profiles.map((p) => [p.id, p.full_name]));
 
   let query = supabase
     .from("activities")

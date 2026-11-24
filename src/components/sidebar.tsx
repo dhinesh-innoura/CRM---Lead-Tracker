@@ -21,28 +21,26 @@ import {
 import SignOutButton from "@/components/sign-out-button";
 
 const NAV = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard, adminOnly: false },
-  { href: "/leads", label: "Own Leads", icon: Users, adminOnly: false },
-  { href: "/leads/sir-given", label: "Assigned Leads", icon: Users, adminOnly: false },
-  { href: "/events", label: "Event Leads", icon: CalendarRange, adminOnly: false },
-  { href: "/followups", label: "Follow-ups", icon: Clock, adminOnly: false },
-  { href: "/responses", label: "Responses", icon: MessageSquare, adminOnly: false },
-  { href: "/meetings", label: "Meetings", icon: CalendarDays, adminOnly: false },
-  { href: "/team", label: "Team Management", icon: UsersRound, adminOnly: true },
-  { href: "/reports", label: "Reports & Analytics", icon: BarChart3, adminOnly: true },
-  { href: "/notifications", label: "Notifications", icon: Bell, adminOnly: false },
-  { href: "/audit", label: "Audit Log", icon: ScrollText, adminOnly: true },
-  { href: "/settings", label: "Settings", icon: Settings, adminOnly: false },
+  { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/leads", label: "Own Leads", icon: Users },
+  { href: "/leads/sir-given", label: "Assigned Leads", icon: Users },
+  { href: "/events", label: "Event Leads", icon: CalendarRange },
+  { href: "/followups", label: "Follow-ups", icon: Clock },
+  { href: "/responses", label: "Responses", icon: MessageSquare },
+  { href: "/meetings", label: "Meetings", icon: CalendarDays },
+  { href: "/team", label: "Team Management", icon: UsersRound },
+  { href: "/reports", label: "Reports & Analytics", icon: BarChart3 },
+  { href: "/notifications", label: "Notifications", icon: Bell },
+  { href: "/audit", label: "Audit Log", icon: ScrollText },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export default function Sidebar({
   fullName,
-  isAdmin,
 }: {
   fullName: string;
-  isAdmin: boolean;
 }) {
-  const nav = NAV.filter((item) => !item.adminOnly || isAdmin);
+  const nav = NAV;
   const pathname = usePathname();
   const activeHref = nav
     .filter((item) => (item.href === "/" ? pathname === "/" : pathname === item.href || pathname.startsWith(`${item.href}/`)))
@@ -109,12 +107,8 @@ export default function Sidebar({
         {!collapsed && (
           <>
             <p className="truncate text-sm font-medium text-white">{fullName}</p>
-            <span
-              className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
-                isAdmin ? "bg-[var(--brand)] text-[#0a2a2c]" : "bg-white/10 text-[var(--sidebar-foreground)]"
-              }`}
-            >
-              {isAdmin ? "Admin" : "BDO"}
+            <span className="mt-1 inline-block rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--sidebar-foreground)]">
+              BDO
             </span>
           </>
         )}

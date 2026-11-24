@@ -108,6 +108,15 @@ export async function importLeads(
     };
 
     if (existingId) {
+      if (overrides?.eventId) {
+        // Link existing master lead to this event without creating a duplicate master lead record
+        await supabase
+          .from("event_leads")
+          .insert({ event_id: overrides.eventId, lead_id: existingId })
+          .select()
+          .maybeSingle();
+      }
+
       if (onDuplicate === "skip") {
         result.skippedRows++;
         continue;
@@ -122,12 +131,24 @@ export async function importLeads(
       continue;
     }
 
-    const { error } = await supabase.from("leads").insert({ ...payload, created_by: user?.id });
+    const { data: newLead, error } = await supabase
+      .from("leads")
+      .insert({ ...payload, owner_id: user?.id, created_by: user?.id })
+      .select("id")
+      .single();
+
     if (error) {
       result.errorRows++;
       result.errors.push({ row: i + 1, message: error.message });
       continue;
     }
+
+    if (overrides?.eventId && newLead?.id) {
+      await supabase
+        .from("event_leads")
+        .insert({ event_id: overrides.eventId, lead_id: newLead.id });
+    }
+
     result.importedRows++;
   }
 
