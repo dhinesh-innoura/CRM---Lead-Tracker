@@ -10,7 +10,7 @@ export default function TeamRowControls({ profile }: { profile: Profile }) {
   return (
     <div className="flex items-center gap-2">
       <select
-        defaultValue={profile.role === "admin" ? "bdo" : profile.role}
+        defaultValue={profile.role}
         disabled={isPending}
         onChange={(e) =>
           startTransition(() => setTeamMemberRole(profile.id, e.target.value as UserRole))

@@ -1,10 +1,11 @@
-import { requireAdminPage } from "@/lib/require-admin";
+import { requireUser } from "@/lib/data";
+
 import { inviteTeamMember } from "@/lib/team-actions";
 import TeamRowControls from "@/components/team-row-controls";
 import { getProfiles } from "@/lib/data";
 
 export default async function TeamPage() {
-  await requireAdminPage();
+  await requireUser();
   const profiles = await getProfiles();
 
   return (
