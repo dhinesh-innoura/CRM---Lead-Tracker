@@ -17,6 +17,7 @@ import {
   Settings,
   ScrollText,
   CalendarRange,
+  Link as LinkedinIcon,
 } from "lucide-react";
 import SignOutButton from "@/components/sign-out-button";
 
@@ -28,6 +29,7 @@ const NAV = [
   { href: "/followups", label: "Follow-ups", icon: Clock },
   { href: "/responses", label: "Responses", icon: MessageSquare },
   { href: "/meetings", label: "Meetings", icon: CalendarDays },
+  { href: "/linkedin", label: "LinkedIn", icon: LinkedinIcon },
   { href: "/team", label: "Team Management", icon: UsersRound },
   { href: "/reports", label: "Reports & Analytics", icon: BarChart3 },
   { href: "/notifications", label: "Notifications", icon: Bell },
