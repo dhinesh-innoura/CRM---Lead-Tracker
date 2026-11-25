@@ -5,6 +5,9 @@ import { createClient } from "@/lib/supabase/server";
 const TEMPLATE_HEADERS = [
   "Company",
   "Website URL",
+  "Country",
+  "Industry",
+  "Location",
   "About Company",
   "Outreach Date",
   "Last Outreach Date",

@@ -103,6 +103,9 @@ export async function importLeads(
     const payload = {
       company_name: companyName,
       company_website: get("company_website") || null,
+      country: get("country") || null,
+      industry: get("industry") || null,
+      location: get("location") || null,
       about_company: get("about_company") || null,
       outreach_date: parseDateOrNull(get("outreach_date")),
       last_outreach_date: parseDateOrNull(get("last_outreach_date")),

@@ -9,6 +9,9 @@ import type { LeadFieldDef, LeadSource } from "@/lib/supabase/types";
 const FIELDS: { key: string; label: string; required?: boolean }[] = [
   { key: "company_name", label: "Company", required: true },
   { key: "company_website", label: "Website URL" },
+  { key: "country", label: "Country" },
+  { key: "industry", label: "Industry" },
+  { key: "location", label: "Location" },
   { key: "about_company", label: "About Company" },
   { key: "outreach_date", label: "Outreach Date" },
   { key: "last_outreach_date", label: "Last Outreach Date" },

@@ -22,6 +22,14 @@ export default function LeadCell({ lead, columnKey }: { lead: Lead; columnKey: s
           <LeadFieldCell leadId={lead.id} field="company_name" initialValue={lead.company_name ?? ""} />
         </div>
       );
+    case "company_website":
+      return <LeadFieldCell leadId={lead.id} field="company_website" initialValue={lead.company_website ?? ""} />;
+    case "country":
+      return <LeadFieldCell leadId={lead.id} field="country" initialValue={lead.country ?? ""} />;
+    case "industry":
+      return <LeadFieldCell leadId={lead.id} field="industry" initialValue={lead.industry ?? ""} />;
+    case "location":
+      return <LeadFieldCell leadId={lead.id} field="location" initialValue={lead.location ?? ""} />;
     case "about_company":
       return (
         <LeadFieldCell
@@ -43,6 +51,8 @@ export default function LeadCell({ lead, columnKey }: { lead: Lead; columnKey: s
       return (
         <LeadFieldCell leadId={lead.id} field="contact_linkedin_url" initialValue={lead.contact_linkedin_url ?? ""} />
       );
+    case "contact_email":
+      return <LeadFieldCell leadId={lead.id} field="contact_email" initialValue={lead.contact_email ?? ""} />;
     case "about_person":
       return <LeadFieldCell leadId={lead.id} field="about_person" initialValue={lead.about_person ?? ""} multiline />;
     case "source":
@@ -77,6 +87,10 @@ export default function LeadCell({ lead, columnKey }: { lead: Lead; columnKey: s
       return <LeadFieldCell leadId={lead.id} field="partners" initialValue={lead.partners ?? ""} />;
     case "annual_revenue":
       return <LeadFieldCell leadId={lead.id} field="annual_revenue" initialValue={lead.annual_revenue ?? ""} />;
+    case "priority":
+      return <LeadFieldCell leadId={lead.id} field="priority" initialValue={lead.priority ?? ""} />;
+    case "notes":
+      return <LeadFieldCell leadId={lead.id} field="notes" initialValue={lead.notes ?? ""} multiline />;
     case "action":
       return <ActiveToggleButton leadId={lead.id} isActive={lead.is_active_lead} />;
     default:

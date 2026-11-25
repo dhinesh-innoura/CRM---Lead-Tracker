@@ -7,11 +7,16 @@ export const LOCKED_COLUMN_KEYS = ["outreach_date", "last_outreach_date"];
 
 export const FIXED_COLUMNS: { key: string; label: string; locked?: boolean }[] = [
   { key: "company", label: "Company" },
+  { key: "company_website", label: "Website URL" },
+  { key: "country", label: "Country" },
+  { key: "industry", label: "Industry" },
+  { key: "location", label: "Location" },
   { key: "about_company", label: "About Company" },
   { key: "outreach_date", label: "Outreach Date", locked: true },
   { key: "last_outreach_date", label: "Last Outreach Date", locked: true },
   { key: "contact", label: "Contact Person" },
   { key: "contact_linkedin_url", label: "LinkedIn URL" },
+  { key: "contact_email", label: "Business Email" },
   { key: "about_person", label: "About Person" },
   { key: "source", label: "Source" },
   { key: "solutions", label: "Solutions" },
@@ -21,6 +26,8 @@ export const FIXED_COLUMNS: { key: string; label: string; locked?: boolean }[] =
   { key: "applications", label: "Applications" },
   { key: "partners", label: "Partners" },
   { key: "annual_revenue", label: "Annual Revenue" },
+  { key: "priority", label: "Priority" },
+  { key: "notes", label: "Notes" },
   { key: "action", label: "Action" },
 ];
 

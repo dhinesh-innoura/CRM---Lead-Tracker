@@ -350,6 +350,9 @@ const EDITABLE_LEAD_FIELDS = new Set([
   "applications",
   "partners",
   "annual_revenue",
+  "contact_email",
+  "priority",
+  "notes",
 ]);
 
 export async function updateLeadField(leadId: string, field: string, value: string) {

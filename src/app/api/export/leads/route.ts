@@ -7,6 +7,7 @@ const EXPORT_COLUMNS: { key: string; label: string }[] = [
   { key: "company_name", label: "Company" },
   { key: "country", label: "Country" },
   { key: "industry", label: "Industry" },
+  { key: "location", label: "Location" },
   { key: "company_website", label: "Website URL" },
   { key: "about_company", label: "About Company" },
   { key: "outreach_date", label: "Outreach Date" },
