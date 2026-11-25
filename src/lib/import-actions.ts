@@ -164,6 +164,8 @@ export async function importLeads(
   });
 
   revalidatePath("/leads");
+  revalidatePath("/leads/sir-given");
+  revalidatePath("/events", "layout");
   revalidatePath("/");
 
   return result;

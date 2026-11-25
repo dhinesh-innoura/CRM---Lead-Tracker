@@ -5,6 +5,19 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { LeadPriority, LeadSource, LeadStatus } from "@/lib/supabase/types";
 
+// Every page that lists leads (Own Leads, Assigned Leads, Event Leads, the
+// dashboard) reads from the same `leads` table, so any action that changes a
+// lead's status/assignment/activity must refresh all of them together —
+// otherwise a tab can show stale data until Next's cache happens to expire
+// on its own, which looks like the change only "took effect the next day".
+function revalidateLeadPaths(leadId?: string) {
+  if (leadId) revalidatePath(`/leads/${leadId}`);
+  revalidatePath("/leads");
+  revalidatePath("/leads/sir-given");
+  revalidatePath("/events", "layout");
+  revalidatePath("/");
+}
+
 export async function createLead(formData: FormData) {
   const supabase = await createClient();
   const {
@@ -61,17 +74,14 @@ export async function updateLeadStatus(leadId: string, status: LeadStatus) {
   const supabase = await createClient();
   const { error } = await supabase.from("leads").update({ status }).eq("id", leadId);
   if (error) throw new Error(error.message);
-  revalidatePath(`/leads/${leadId}`);
-  revalidatePath("/leads");
-  revalidatePath("/");
+  revalidateLeadPaths(leadId);
 }
 
 export async function toggleLeadActive(leadId: string, isActive: boolean) {
   const supabase = await createClient();
   const { error } = await supabase.from("leads").update({ is_active_lead: isActive }).eq("id", leadId);
   if (error) throw new Error(error.message);
-  revalidatePath(`/leads/${leadId}`);
-  revalidatePath("/leads");
+  revalidateLeadPaths(leadId);
 }
 
 export async function updateLeadAssignment(leadId: string, assignedTo: string) {
@@ -91,10 +101,7 @@ export async function updateLeadAssignment(leadId: string, assignedTo: string) {
     .update(updates)
     .eq("id", leadId);
   if (error) throw new Error(error.message);
-  revalidatePath(`/leads/${leadId}`);
-  revalidatePath("/leads");
-  revalidatePath("/leads/sir-given");
-  revalidatePath("/events", "layout");
+  revalidateLeadPaths(leadId);
 }
 
 export async function addNote(leadId: string, note: string) {
@@ -143,8 +150,7 @@ export async function upsertMeeting(
   });
   if (error) throw new Error(error.message);
 
-  revalidatePath(`/leads/${leadId}`);
-  revalidatePath("/leads");
+  revalidateLeadPaths(leadId);
   revalidatePath("/meetings");
 }
 
@@ -161,8 +167,7 @@ export async function recordQuickResponse(leadId: string, responseText: string) 
   });
   if (error) throw new Error(error.message);
 
-  revalidatePath(`/leads/${leadId}`);
-  revalidatePath("/leads");
+  revalidateLeadPaths(leadId);
   revalidatePath("/responses");
 }
 
@@ -190,8 +195,7 @@ export async function setLeadOnHold(leadId: string, reason: string) {
   });
   if (error) throw new Error(error.message);
 
-  revalidatePath(`/leads/${leadId}`);
-  revalidatePath("/leads");
+  revalidateLeadPaths(leadId);
 }
 
 export async function updateHoldReason(leadId: string, reason: string) {
@@ -201,8 +205,7 @@ export async function updateHoldReason(leadId: string, reason: string) {
     p_reason: reason,
   });
   if (error) throw new Error(error.message);
-  revalidatePath("/leads");
-  revalidatePath(`/leads/${leadId}`);
+  revalidateLeadPaths(leadId);
 }
 
 export async function markMeetingCompleted(meetingId: string, leadId: string) {
@@ -212,8 +215,7 @@ export async function markMeetingCompleted(meetingId: string, leadId: string) {
   const { error: e2 } = await supabase.from("leads").update({ status: "meeting_completed" }).eq("id", leadId);
   if (e2) throw new Error(e2.message);
   revalidatePath("/meetings");
-  revalidatePath(`/leads/${leadId}`);
-  revalidatePath("/leads");
+  revalidateLeadPaths(leadId);
 }
 
 export async function markNotificationRead(id: string) {
@@ -229,8 +231,7 @@ export async function bulkUpdateStatus(leadIds: string[], status: LeadStatus) {
     p_status: status,
   });
   if (error) throw new Error(error.message);
-  revalidatePath("/leads");
-  revalidatePath("/");
+  revalidateLeadPaths();
 }
 
 export async function bulkUpdateAssignment(leadIds: string[], assignedTo: string) {
@@ -240,8 +241,7 @@ export async function bulkUpdateAssignment(leadIds: string[], assignedTo: string
     p_assigned_to: assignedTo || null,
   });
   if (error) throw new Error(error.message);
-  revalidatePath("/leads");
-  revalidatePath("/");
+  revalidateLeadPaths();
 }
 
 export async function saveFilter(name: string, query: Record<string, string>) {
@@ -329,7 +329,7 @@ export async function updateLeadCustomField(leadId: string, key: string, value: 
     p_value: value,
   });
   if (error) throw new Error(error.message);
-  revalidatePath("/leads");
+  revalidateLeadPaths(leadId);
 }
 
 const EDITABLE_LEAD_FIELDS = new Set([
@@ -355,9 +355,7 @@ export async function updateLeadField(leadId: string, field: string, value: stri
   const supabase = await createClient();
   const { error } = await supabase.from("leads").update({ [field]: value }).eq("id", leadId);
   if (error) throw new Error(error.message);
-  revalidatePath("/leads");
-  revalidatePath("/leads/sir-given");
-  revalidatePath(`/leads/${leadId}`);
+  revalidateLeadPaths(leadId);
 }
 
 export interface ManualLeadRow {
