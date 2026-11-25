@@ -11,11 +11,8 @@ import {
   Clock,
   MessageSquare,
   CalendarDays,
-  UsersRound,
-  BarChart3,
   Bell,
   Settings,
-  ScrollText,
   CalendarRange,
   Link as LinkedinIcon,
 } from "lucide-react";
@@ -30,10 +27,7 @@ const NAV = [
   { href: "/responses", label: "Responses", icon: MessageSquare },
   { href: "/meetings", label: "Meetings", icon: CalendarDays },
   { href: "/linkedin", label: "LinkedIn", icon: LinkedinIcon },
-  { href: "/team", label: "Team Management", icon: UsersRound },
-  { href: "/reports", label: "Reports & Analytics", icon: BarChart3 },
   { href: "/notifications", label: "Notifications", icon: Bell },
-  { href: "/audit", label: "Audit Log", icon: ScrollText },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
