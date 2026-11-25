@@ -72,6 +72,15 @@ export default async function LeadsSection({
   const tab = tabs.includes(sp.tab as TabKey) ? (sp.tab as TabKey) : tabs[0];
   const allTabLabel = tabs.includes("new") ? "All Leads" : "Leads";
 
+  // A lead worked on today (status changed for the first time) stays in
+  // New Leads for the rest of today's calendar day; it only moves into All
+  // Leads once the next day begins, so today's batch stays together.
+  const now = new Date();
+  const startOfToday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())).toISOString();
+  const startOfTomorrow = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1)
+  ).toISOString();
+
   // If viewing an event, fetch all linked lead IDs from event_leads
   let eventLeadIds: string[] = [];
   if (eventId || viewMode === "event") {
@@ -112,15 +121,26 @@ export default async function LeadsSection({
     return q2;
   }
 
-  // All Leads is its own bucket: a lead with no status yet belongs only in
-  // New Leads, and a lead explicitly marked active (is_active_lead) belongs
-  // only in Active Leads — exclude both so entering/uploading/marking a
-  // lead only ever surfaces it in exactly one tab.
+  // New Leads: no status yet, OR status was first set earlier today — keeps
+  // today's in-progress batch together until the day rolls over.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function applyNewTabFilter(query: any): any {
+    return query.or(
+      `status.is.null,and(first_status_at.gte.${startOfToday},first_status_at.lt.${startOfTomorrow})`
+    );
+  }
+
+  // All Leads is its own bucket: a lead still sitting in today's New Leads
+  // batch, or one explicitly marked active (is_active_lead), is excluded —
+  // so entering/uploading/marking a lead only ever surfaces it in exactly
+  // one tab, and a lead only graduates out of New Leads at the next day.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function applyAllTabFilter(query: any): any {
     let q2 = query.eq("is_active_lead", false);
     if (tabs.includes("new")) {
-      q2 = q2.not("status", "is", null);
+      q2 = q2
+        .not("status", "is", null)
+        .or(`first_status_at.is.null,first_status_at.lt.${startOfToday}`);
     }
     return q2;
   }
@@ -142,7 +162,7 @@ export default async function LeadsSection({
       .eq("owner_id", user.id)
       .order("created_at", { ascending: false }),
     tabs.includes("new")
-      ? scoped(supabase.from("leads").select("id", { count: "exact", head: true })).is("status", null)
+      ? applyNewTabFilter(scoped(supabase.from("leads").select("id", { count: "exact", head: true })))
       : Promise.resolve({ count: 0 }),
     applyAllTabFilter(scoped(supabase.from("leads").select("id", { count: "exact", head: true }))),
     scoped(supabase.from("leads").select("id", { count: "exact", head: true })).eq("is_active_lead", true),
@@ -159,7 +179,7 @@ export default async function LeadsSection({
   // Build query for the currently active tab
   let currentTabQuery = scoped(supabase.from("leads").select("*"));
   if (tab === "new") {
-    currentTabQuery = currentTabQuery.is("status", null);
+    currentTabQuery = applyNewTabFilter(currentTabQuery);
   } else if (tab === "active") {
     currentTabQuery = currentTabQuery.eq("is_active_lead", true);
   } else if (tab === "all") {

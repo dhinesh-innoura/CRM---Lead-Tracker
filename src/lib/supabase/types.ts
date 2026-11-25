@@ -85,6 +85,7 @@ export interface Lead {
   assigned_at: string | null;
   priority: LeadPriority;
   status: LeadStatus | null;
+  first_status_at: string | null;
   last_contacted_at: string | null;
   outreach_date: string | null;
   last_outreach_date: string | null;
