@@ -30,6 +30,37 @@ export default function LinkedinPage() {
   };
   const [trackingRows, setTrackingRows] = useState<TrackingRow[]>([]);
 
+  // ----- Add button handling (Tracking tab) -----
+  const [showAddTrackingModal, setShowAddTrackingModal] = useState(false);
+  const [newCompany, setNewCompany] = useState('');
+  const [newPerson, setNewPerson] = useState('');
+  const [newProfileUrl, setNewProfileUrl] = useState('');
+  const [newStatus, setNewStatus] = useState<'response' | 'no_response'>('no_response');
+  const resetTrackingForm = () => {
+    setNewCompany('');
+    setNewPerson('');
+    setNewProfileUrl('');
+    setNewStatus('no_response');
+  };
+  const handleAddTrackingSave = () => {
+    if (!newCompany.trim() && !newPerson.trim()) return;
+    setTrackingRows(prev => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        company_name: newCompany.trim() || null,
+        person_name: newPerson.trim() || null,
+        person_profile_url: newProfileUrl.trim() || null,
+        status: newStatus,
+      },
+    ]);
+    setShowAddTrackingModal(false);
+    resetTrackingForm();
+  };
+  const removeTrackingRow = (id: string) => {
+    setTrackingRows(prev => prev.filter(row => row.id !== id));
+  };
+
   // ----- Add button handling (Count tab) -----
   const [showAddModal, setShowAddModal] = useState(false);
   const [newTotal, setNewTotal] = useState('');
@@ -215,45 +246,127 @@ export default function LinkedinPage() {
 
       {/* Tracking tab */}
       {tab === "tracking" && (
-        <div className="overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-black/5">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50 text-xs font-medium uppercase text-gray-500">
-              <tr>
-                <th className="px-4 py-2">Company</th>
-                <th className="px-4 py-2">Person(s)</th>
-                <th className="px-4 py-2">Profile URL</th>
-                <th className="px-4 py-2">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {trackingRows.map(row => (
-                <tr key={row.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-2">{row.company_name ?? "-"}</td>
-                  <td className="px-4 py-2">{row.person_name ?? "-"}</td>
-                  <td className="px-4 py-2">
-                    {row.person_profile_url ? (
-                      <a href={row.person_profile_url} target="_blank" rel="noopener noreferrer" className="text-[var(--brand)] hover:underline">
-                        View Profile
-                      </a>
-                    ) : (
-                      "-"
-                    )}
-                  </td>
-                  <td className="px-4 py-2">
-                    {row.status === "response" ? "Response" : "No Response"}
-                  </td>
-                </tr>
-              ))}
-              {trackingRows.length === 0 && (
+        <>
+          {/* Add button */}
+          <div>
+            <button
+              onClick={() => setShowAddTrackingModal(true)}
+              className="rounded bg-[var(--brand)] px-4 py-2 text-white hover:bg-[var(--brand)]/90"
+            >
+              + Add Tracking Entry
+            </button>
+          </div>
+
+          <div className="overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-black/5">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-gray-50 text-xs font-medium uppercase text-gray-500">
                 <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-gray-400">
-                    No tracking data available.
-                  </td>
+                  <th className="px-4 py-2">Company</th>
+                  <th className="px-4 py-2">Person(s)</th>
+                  <th className="px-4 py-2">Profile URL</th>
+                  <th className="px-4 py-2">Status</th>
+                  <th className="px-4 py-2"></th>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {trackingRows.map(row => (
+                  <tr key={row.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-2">{row.company_name ?? "-"}</td>
+                    <td className="px-4 py-2">{row.person_name ?? "-"}</td>
+                    <td className="px-4 py-2">
+                      {row.person_profile_url ? (
+                        <a href={row.person_profile_url} target="_blank" rel="noopener noreferrer" className="text-[var(--brand)] hover:underline">
+                          View Profile
+                        </a>
+                      ) : (
+                        "-"
+                      )}
+                    </td>
+                    <td className="px-4 py-2">
+                      {row.status === "response" ? "Response" : "No Response"}
+                    </td>
+                    <td className="px-4 py-2">
+                      <button
+                        onClick={() => removeTrackingRow(row.id)}
+                        className="text-xs text-gray-400 hover:text-red-600"
+                      >
+                        Remove
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {trackingRows.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="px-4 py-8 text-center text-gray-400">
+                      No tracking data available.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Add tracking modal */}
+          {showAddTrackingModal && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black/30">
+              <div className="w-80 rounded-xl bg-white p-6 shadow-lg">
+                <h3 className="mb-4 text-lg font-semibold">Add Tracking Entry</h3>
+                <label className="mb-2 block">
+                  Company:
+                  <input
+                    type="text"
+                    value={newCompany}
+                    onChange={e => setNewCompany(e.target.value)}
+                    className="mt-1 w-full rounded border px-2 py-1"
+                  />
+                </label>
+                <label className="mb-2 block">
+                  Person:
+                  <input
+                    type="text"
+                    value={newPerson}
+                    onChange={e => setNewPerson(e.target.value)}
+                    className="mt-1 w-full rounded border px-2 py-1"
+                  />
+                </label>
+                <label className="mb-2 block">
+                  Profile URL:
+                  <input
+                    type="text"
+                    value={newProfileUrl}
+                    onChange={e => setNewProfileUrl(e.target.value)}
+                    className="mt-1 w-full rounded border px-2 py-1"
+                  />
+                </label>
+                <label className="mb-4 block">
+                  Status:
+                  <select
+                    value={newStatus}
+                    onChange={e => setNewStatus(e.target.value as 'response' | 'no_response')}
+                    className="mt-1 w-full rounded border px-2 py-1"
+                  >
+                    <option value="no_response">No Response</option>
+                    <option value="response">Response</option>
+                  </select>
+                </label>
+                <div className="flex justify-end space-x-2">
+                  <button
+                    onClick={() => {
+                      setShowAddTrackingModal(false);
+                      resetTrackingForm();
+                    }}
+                    className="px-3 py-1 text-sm text-gray-600"
+                  >
+                    Cancel
+                  </button>
+                  <button onClick={handleAddTrackingSave} className="rounded bg-[var(--brand)] px-3 py-1 text-sm text-white">
+                    Save
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
