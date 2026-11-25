@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as XLSX from "xlsx";
 import { createClient } from "@/lib/supabase/server";
+import { LEAD_STATUSES, STATUS_LABELS } from "@/lib/supabase/types";
 
 const TEMPLATE_HEADERS = [
   "Company",
@@ -53,6 +54,18 @@ export async function GET(request: NextRequest) {
   const worksheet = XLSX.utils.aoa_to_sheet([headers]);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "Leads Template");
+
+  // Only these exact statuses (same ones the Status dropdown in the table
+  // uses) are accepted — list them on a second sheet as a reference, since
+  // this xlsx library can't write a real in-cell dropdown.
+  if (headers.includes("Status")) {
+    const statusSheet = XLSX.utils.aoa_to_sheet([
+      ["Use one of these values in the Status column"],
+      ...LEAD_STATUSES.map((s) => [STATUS_LABELS[s]]),
+    ]);
+    XLSX.utils.book_append_sheet(workbook, statusSheet, "Valid Status Values");
+  }
+
   const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
 
   return new NextResponse(buffer, {
