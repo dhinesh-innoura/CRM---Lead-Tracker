@@ -79,7 +79,7 @@ export default async function NewLeadPage() {
 
         <button
           type="submit"
-          className="rounded-lg bg-[var(--sidebar)] px-6 py-2.5 text-sm font-medium text-white hover:bg-black"
+          className="rounded-lg bg-[var(--brand)] px-6 py-2.5 text-sm font-medium text-white hover:opacity-90"
         >
           Save Lead
         </button>

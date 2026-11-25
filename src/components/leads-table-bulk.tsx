@@ -81,7 +81,7 @@ export default function LeadsTableBulk({
 
           <a
             href={`/api/export/leads?ids=${selectedIds.join(",")}`}
-            className="ml-auto rounded-lg bg-[var(--brand)] px-3 py-1.5 text-sm font-medium text-[#0a2a2c] hover:opacity-90"
+            className="ml-auto rounded-lg bg-[var(--brand)] px-3 py-1.5 text-sm font-medium text-white hover:opacity-90"
           >
             Export Selected
           </a>

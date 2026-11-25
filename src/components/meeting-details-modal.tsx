@@ -90,7 +90,7 @@ export default function MeetingDetailsModal({
           <button
             type="submit"
             disabled={saving || !date}
-            className="rounded-lg bg-[var(--sidebar)] px-4 py-2 text-sm font-medium text-white hover:bg-black disabled:opacity-60"
+            className="rounded-lg bg-[var(--brand)] px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-60"
           >
             {saving ? "Saving..." : "Save"}
           </button>

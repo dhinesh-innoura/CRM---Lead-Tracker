@@ -20,7 +20,7 @@ export default function ImportModal({
     <>
       <button
         onClick={() => setOpen(true)}
-        className="rounded-lg bg-[var(--sidebar)] px-4 py-2 text-sm font-medium text-white hover:bg-black"
+        className="rounded-lg bg-[var(--brand)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
       >
         Import from Excel
       </button>

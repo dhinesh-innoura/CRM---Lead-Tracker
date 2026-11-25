@@ -95,7 +95,7 @@ export default function Sidebar({
                 collapsed ? "justify-center" : ""
               } ${
                 isActive
-                  ? "bg-[var(--brand)] text-[#0a2a2c]"
+                  ? "bg-[var(--brand)] text-white"
                   : "text-[var(--sidebar-foreground)] hover:bg-white/5 hover:text-white"
               }`}
             >

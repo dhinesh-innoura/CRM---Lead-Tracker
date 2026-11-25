@@ -30,7 +30,7 @@ export default async function TeamPage() {
             required
             className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
           />
-          <button className="rounded-lg bg-[var(--sidebar)] px-4 py-2 text-sm font-medium text-white hover:bg-black">
+          <button className="rounded-lg bg-[var(--brand)] px-4 py-2 text-sm font-medium text-white hover:opacity-90">
             Send Invite
           </button>
         </form>

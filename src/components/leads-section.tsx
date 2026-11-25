@@ -358,7 +358,7 @@ export default async function LeadsSection({
                 title="Created to"
                 className="rounded-lg border border-gray-300 px-2 py-2 text-sm"
               />
-              <button className="col-span-2 rounded-lg bg-[var(--sidebar)] px-4 py-2 text-sm font-medium text-white hover:bg-black lg:col-span-1">
+              <button className="col-span-2 rounded-lg bg-[var(--brand)] px-4 py-2 text-sm font-medium text-white hover:opacity-90 lg:col-span-1">
                 Apply
               </button>
             </form>

@@ -12,7 +12,7 @@ export default function AddEventModal() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="rounded-lg bg-[var(--sidebar)] px-4 py-2 text-sm font-medium text-white hover:bg-black"
+        className="rounded-lg bg-[var(--brand)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
       >
         + Add Event
       </button>
@@ -91,7 +91,7 @@ export default function AddEventModal() {
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-lg bg-[var(--sidebar)] px-4 py-2 text-sm font-medium text-white hover:bg-black disabled:opacity-60"
+                className="rounded-lg bg-[var(--brand)] px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-60"
               >
                 {saving ? "Creating..." : "Create Event"}
               </button>

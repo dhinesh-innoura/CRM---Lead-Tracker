@@ -111,7 +111,7 @@ export default function ImportClient({
           type="file"
           accept=".xlsx,.xls,.csv"
           onChange={handleFile}
-          className="text-sm text-gray-600 file:mr-4 file:rounded-lg file:border-0 file:bg-[var(--sidebar)] file:px-4 file:py-2 file:text-sm file:font-medium file:text-white"
+          className="text-sm text-gray-600 file:mr-4 file:rounded-lg file:border-0 file:bg-[var(--brand)] file:px-4 file:py-2 file:text-sm file:font-medium file:text-white"
         />
         {rows.length > 0 && (
           <p className="mt-2 text-sm text-gray-500">
@@ -206,7 +206,7 @@ export default function ImportClient({
             <button
               onClick={handleImport}
               disabled={importing || !mapping.company_name}
-              className="ml-auto rounded-lg bg-[var(--sidebar)] px-5 py-2 text-sm font-medium text-white hover:bg-black disabled:opacity-60"
+              className="ml-auto rounded-lg bg-[var(--brand)] px-5 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-60"
             >
               {importing ? "Importing..." : `Import ${rows.length} Rows`}
             </button>

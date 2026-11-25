@@ -344,7 +344,7 @@ export default function AddLeadModal({
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="rounded-lg bg-[var(--sidebar)] px-5 py-2 text-sm font-medium text-white hover:bg-black disabled:opacity-60"
+                className="rounded-lg bg-[var(--brand)] px-5 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-60"
               >
                 {isSaving ? "Saving..." : `Save ${rows.length > 1 ? `${rows.length} Leads` : "Lead"}`}
               </button>

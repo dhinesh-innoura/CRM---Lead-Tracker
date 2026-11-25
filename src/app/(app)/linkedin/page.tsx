@@ -403,7 +403,7 @@ export default function LinkedinPage() {
                   </button>
                   <button
                     onClick={handleAddTrackingSave}
-                    className="rounded-lg bg-[var(--sidebar)] px-5 py-2 text-sm font-medium text-white hover:bg-black"
+                    className="rounded-lg bg-[var(--brand)] px-5 py-2 text-sm font-medium text-white hover:opacity-90"
                   >
                     Save {draftRows.length > 1 ? `${draftRows.length} Entries` : 'Entry'}
                   </button>

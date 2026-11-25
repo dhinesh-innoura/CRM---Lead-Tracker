@@ -29,7 +29,7 @@ export default function NoteForm({ leadId }: { leadId: string }) {
       <button
         type="submit"
         disabled={isPending}
-        className="self-start rounded-lg bg-[var(--sidebar)] px-4 py-2 text-sm font-medium text-white hover:bg-black disabled:opacity-60"
+        className="self-start rounded-lg bg-[var(--brand)] px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-60"
       >
         Add
       </button>

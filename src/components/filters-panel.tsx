@@ -20,7 +20,7 @@ export default function FiltersPanel({
       >
         <Filter size={16} />
         Filters
-        {hasActiveFilters && <span className="ml-1 rounded-full bg-[var(--brand)] px-1.5 text-xs text-[#0a2a2c]">on</span>}
+        {hasActiveFilters && <span className="ml-1 rounded-full bg-[var(--brand)] px-1.5 text-xs text-white">on</span>}
       </button>
       {open && children}
     </div>
