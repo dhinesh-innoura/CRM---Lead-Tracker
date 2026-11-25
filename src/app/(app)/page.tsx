@@ -1,5 +1,5 @@
 import { requireUser } from "@/lib/data";
-import { ACTIVE_PIPELINE_STATUSES, type Lead } from "@/lib/supabase/types";
+import type { Lead } from "@/lib/supabase/types";
 import Link from "next/link";
 
 function Kpi({ label, value, href }: { label: string; value: number; href?: string }) {
@@ -33,9 +33,7 @@ export default async function DashboardPage() {
   );
   const assignedLeads = all.filter((l) => l.assigned_to === user.id);
   const eventLeads = all.filter((l) => l.event_id || eventLeadIdSet.has(l.id));
-  const activeLeads = all.filter(
-    (l) => l.is_active_lead || (l.status && ACTIVE_PIPELINE_STATUSES.includes(l.status))
-  );
+  const activeLeads = all.filter((l) => l.is_active_lead);
   const dueToday = all.filter((l) => l.next_follow_up_date === today);
   const overdue = all.filter((l) => l.next_follow_up_date && l.next_follow_up_date < today);
   const meetingsScheduled = all.filter(

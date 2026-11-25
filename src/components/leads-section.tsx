@@ -11,7 +11,6 @@ import AddLeadModal from "@/components/add-lead-modal";
 import FiltersPanel from "@/components/filters-panel";
 import { mergeColumnPrefs, type ColumnPref } from "@/lib/lead-columns";
 import {
-  ACTIVE_PIPELINE_STATUSES,
   LEAD_SOURCES,
   LEAD_STATUSES,
   STATUS_LABELS,
@@ -113,11 +112,17 @@ export default async function LeadsSection({
     return q2;
   }
 
-  // A lead with no status yet belongs only in New Leads — exclude it from
-  // the All Leads bucket/count so a fresh import doesn't show in both tabs.
+  // All Leads is its own bucket: a lead with no status yet belongs only in
+  // New Leads, and a lead explicitly marked active (is_active_lead) belongs
+  // only in Active Leads — exclude both so entering/uploading/marking a
+  // lead only ever surfaces it in exactly one tab.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function applyAllTabFilter(query: any): any {
-    return tabs.includes("new") ? query.not("status", "is", null) : query;
+    let q2 = query.eq("is_active_lead", false);
+    if (tabs.includes("new")) {
+      q2 = q2.not("status", "is", null);
+    }
+    return q2;
   }
 
   // Independent reads — fire together instead of one round trip at a time.
@@ -140,9 +145,7 @@ export default async function LeadsSection({
       ? scoped(supabase.from("leads").select("id", { count: "exact", head: true })).is("status", null)
       : Promise.resolve({ count: 0 }),
     applyAllTabFilter(scoped(supabase.from("leads").select("id", { count: "exact", head: true }))),
-    scoped(supabase.from("leads").select("id", { count: "exact", head: true })).or(
-      `is_active_lead.eq.true,status.in.(${ACTIVE_PIPELINE_STATUSES.join(",")})`
-    ),
+    scoped(supabase.from("leads").select("id", { count: "exact", head: true })).eq("is_active_lead", true),
   ]);
   const fieldDefs = (fieldDefsData ?? []) as LeadFieldDef[];
   const columns = mergeColumnPrefs((prefRow?.columns as ColumnPref[]) ?? [], fieldDefs).filter(
@@ -158,9 +161,7 @@ export default async function LeadsSection({
   if (tab === "new") {
     currentTabQuery = currentTabQuery.is("status", null);
   } else if (tab === "active") {
-    currentTabQuery = currentTabQuery.or(
-      `is_active_lead.eq.true,status.in.(${ACTIVE_PIPELINE_STATUSES.join(",")})`
-    );
+    currentTabQuery = currentTabQuery.eq("is_active_lead", true);
   } else if (tab === "all") {
     currentTabQuery = applyAllTabFilter(currentTabQuery);
   }
