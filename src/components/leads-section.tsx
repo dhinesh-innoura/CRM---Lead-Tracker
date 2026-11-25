@@ -100,8 +100,13 @@ export default async function LeadsSection({
     let q2 = query;
 
     if (viewMode === "own") {
-      // Own Leads: owner_id equals logged in user (with fallback to created_by for legacy records)
-      q2 = q2.or(`owner_id.eq.${user.id},and(owner_id.is.null,created_by.eq.${user.id})`);
+      // Own Leads: owner_id equals logged in user (with fallback to created_by
+      // for legacy records), and not formally assigned to anyone — once a
+      // lead is assigned, it belongs to Assigned Leads instead, even if you
+      // are also the owner (e.g. you added it from the Assigned Leads tab).
+      q2 = q2
+        .or(`owner_id.eq.${user.id},and(owner_id.is.null,created_by.eq.${user.id})`)
+        .is("assigned_to", null);
     } else if (viewMode === "assigned") {
       // Assigned Leads: assigned_to equals logged in user
       q2 = q2.eq("assigned_to", user.id);
