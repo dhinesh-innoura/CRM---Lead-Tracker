@@ -4,7 +4,14 @@ import { useState, useTransition } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import Modal from "@/components/modal";
 import { createLeadsManually, type ManualLeadRow } from "@/lib/actions";
-import { LEAD_SOURCES, LEAD_STATUSES, STATUS_LABELS, type LeadFieldDef, type LeadSource } from "@/lib/supabase/types";
+import {
+  LEAD_SOURCES,
+  LEAD_STATUSES,
+  STATUS_LABELS,
+  type LeadFieldDef,
+  type LeadSource,
+  type LeadStatus,
+} from "@/lib/supabase/types";
 
 type Row = ManualLeadRow & { customValues: Record<string, string> };
 
@@ -19,10 +26,12 @@ const labelClass = "mb-1 block text-xs font-medium text-gray-600";
 export default function AddLeadModal({
   fieldDefs,
   defaultSource,
+  defaultStatus,
   eventId,
 }: {
   fieldDefs: LeadFieldDef[];
   defaultSource?: LeadSource;
+  defaultStatus?: LeadStatus;
   eventId?: string;
 }) {
   const [open, setOpen] = useState(false);
@@ -53,7 +62,7 @@ export default function AddLeadModal({
     const payload = rows.map((r) => ({ ...r, custom_fields: r.customValues }));
     startTransition(async () => {
       try {
-        await createLeadsManually(payload, { defaultSource, eventId });
+        await createLeadsManually(payload, { defaultSource, defaultStatus, eventId });
         setRows([emptyRow()]);
         setOpen(false);
       } catch (e) {

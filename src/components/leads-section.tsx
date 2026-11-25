@@ -113,6 +113,13 @@ export default async function LeadsSection({
     return q2;
   }
 
+  // A lead with no status yet belongs only in New Leads — exclude it from
+  // the All Leads bucket/count so a fresh import doesn't show in both tabs.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function applyAllTabFilter(query: any): any {
+    return tabs.includes("new") ? query.not("status", "is", null) : query;
+  }
+
   // Independent reads — fire together instead of one round trip at a time.
   const [
     { data: fieldDefsData },
@@ -132,7 +139,7 @@ export default async function LeadsSection({
     tabs.includes("new")
       ? scoped(supabase.from("leads").select("id", { count: "exact", head: true })).is("status", null)
       : Promise.resolve({ count: 0 }),
-    scoped(supabase.from("leads").select("id", { count: "exact", head: true })),
+    applyAllTabFilter(scoped(supabase.from("leads").select("id", { count: "exact", head: true }))),
     scoped(supabase.from("leads").select("id", { count: "exact", head: true })).or(
       `is_active_lead.eq.true,status.in.(${ACTIVE_PIPELINE_STATUSES.join(",")})`
     ),
@@ -154,6 +161,8 @@ export default async function LeadsSection({
     currentTabQuery = currentTabQuery.or(
       `is_active_lead.eq.true,status.in.(${ACTIVE_PIPELINE_STATUSES.join(",")})`
     );
+  } else if (tab === "all") {
+    currentTabQuery = applyAllTabFilter(currentTabQuery);
   }
 
   // Apply search and global filters
@@ -242,7 +251,12 @@ export default async function LeadsSection({
       </div>
 
       <div className="flex items-center justify-end gap-2">
-        <AddLeadModal fieldDefs={fieldDefs} eventId={eventId} defaultSource={sourceFilter?.[0]} />
+        <AddLeadModal
+          fieldDefs={fieldDefs}
+          eventId={eventId}
+          defaultSource={sourceFilter?.[0]}
+          defaultStatus={tab === "new" ? undefined : "outreach_initiated"}
+        />
         <ImportModal
           fieldDefs={fieldDefs}
           eventId={eventId}

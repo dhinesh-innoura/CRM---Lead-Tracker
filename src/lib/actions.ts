@@ -388,7 +388,7 @@ export interface ManualLeadRow {
 
 export async function createLeadsManually(
   rows: ManualLeadRow[],
-  overrides?: { defaultSource?: LeadSource; eventId?: string }
+  overrides?: { defaultSource?: LeadSource; defaultStatus?: LeadStatus; eventId?: string }
 ) {
   const supabase = await createClient();
   const {
@@ -416,7 +416,7 @@ export async function createLeadsManually(
       solutions: clean(r.solutions),
       products: clean(r.products),
       ai_synergy: clean(r.ai_synergy),
-      status: (clean(r.status) as LeadStatus) ?? null,
+      status: (clean(r.status) as LeadStatus) ?? overrides?.defaultStatus ?? null,
       applications: clean(r.applications),
       partners: clean(r.partners),
       annual_revenue: clean(r.annual_revenue),
