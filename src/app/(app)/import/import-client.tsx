@@ -37,18 +37,28 @@ function guessMapping(headers: string[]) {
   const normalize = (s: string) => s.toLowerCase().replace(/[^a-z]/g, "");
 
   for (const field of FIELDS) {
-    const fieldNorm = normalize(field.key);
+    // Match against the human-readable label first (that's what our own
+    // template/table headers actually are — e.g. "Contact Person", not
+    // "contact_name"), falling back to the field key for other files.
+    const labelNorm = normalize(field.label);
+    const keyNorm = normalize(field.key);
     const available = headers.filter((h) => !usedHeaders.has(h));
 
     // Prefer an exact normalized match; only fall back to a substring match
     // (and only against a reasonably long header) so a short/ambiguous
     // header like "Company" can't also get claimed by "Company Website".
-    const exact = available.find((h) => normalize(h) === fieldNorm);
+    const exact = available.find((h) => {
+      const hNorm = normalize(h);
+      return hNorm === labelNorm || hNorm === keyNorm;
+    });
     const match =
       exact ??
       available.find((h) => {
         const hNorm = normalize(h);
-        return hNorm.length >= 4 && (hNorm.includes(fieldNorm) || fieldNorm.includes(hNorm));
+        return (
+          hNorm.length >= 4 &&
+          (hNorm.includes(labelNorm) || labelNorm.includes(hNorm) || hNorm.includes(keyNorm) || keyNorm.includes(hNorm))
+        );
       });
 
     if (match) {
