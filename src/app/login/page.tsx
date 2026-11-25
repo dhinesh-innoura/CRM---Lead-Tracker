@@ -4,8 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-const SHARED_PASSWORD = "Tracker360!";
-
 const TEAM = [
   { name: "Dhinesh", email: "dhinesh@aivision360.com" },
   { name: "Sujitha", email: "sujitha@aivision360.com" },
@@ -17,36 +15,38 @@ const TEAM = [
 
 export default function LoginPage() {
   const router = useRouter();
-  const [signingInAs, setSigningInAs] = useState<string | null>(null);
+  const [selected, setSelected] = useState<{ name: string; email: string } | null>(null);
+  const [password, setPassword] = useState("");
+  const [signingIn, setSigningIn] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleSelect(name: string, email: string) {
-    setSigningInAs(name);
+  function handleSelect(name: string, email: string) {
+    setSelected({ name, email });
+    setPassword("");
+    setError(null);
+  }
+
+  function handleBack() {
+    setSelected(null);
+    setPassword("");
+    setError(null);
+  }
+
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+    if (!selected) return;
+    setSigningIn(true);
     setError(null);
 
     const supabase = createClient();
-    let res = await supabase.auth.signInWithPassword({
-      email,
-      password: SHARED_PASSWORD,
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: selected.email,
+      password,
     });
 
-    // If initial attempt fails and member had a .user account, try alternate email
-    if (res.error && (name === "Dhinesh" || name === "Sujitha")) {
-      const altEmail = email.includes(".user@")
-        ? email.replace(".user@", "@")
-        : email.replace("@", ".user@");
-      const fallback = await supabase.auth.signInWithPassword({
-        email: altEmail,
-        password: SHARED_PASSWORD,
-      });
-      if (!fallback.error) {
-        res = fallback;
-      }
-    }
-
-    if (res.error) {
-      setError(res.error.message);
-      setSigningInAs(null);
+    if (signInError) {
+      setError("Incorrect password. Please try again.");
+      setSigningIn(false);
       return;
     }
 
@@ -66,19 +66,50 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <div className="space-y-2">
-          <p className="mb-3 text-sm font-medium text-gray-700">Who are you?</p>
-          {TEAM.map((m) => (
+        {!selected ? (
+          <div className="space-y-2">
+            <p className="mb-3 text-sm font-medium text-gray-700">Who are you?</p>
+            {TEAM.map((m) => (
+              <button
+                key={m.name}
+                onClick={() => handleSelect(m.name, m.email)}
+                className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-left text-sm font-medium text-[#1c2024] transition hover:border-[var(--brand)] hover:bg-cyan-50/40"
+              >
+                {m.name}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <button
+                type="button"
+                onClick={handleBack}
+                className="mb-3 text-xs font-medium text-gray-400 hover:text-gray-600"
+              >
+                ← Back
+              </button>
+              <p className="text-sm font-medium text-gray-700">
+                Hi, <span className="text-[#1c2024]">{selected.name}</span> — enter your password
+              </p>
+            </div>
+            <input
+              type="password"
+              autoFocus
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-[var(--brand)] focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
+            />
             <button
-              key={m.name}
-              disabled={signingInAs !== null}
-              onClick={() => handleSelect(m.name, m.email)}
-              className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-left text-sm font-medium text-[#1c2024] transition hover:border-[var(--brand)] hover:bg-cyan-50/40 disabled:opacity-60"
+              type="submit"
+              disabled={signingIn || password.length === 0}
+              className="w-full rounded-lg bg-[var(--brand)] px-4 py-2.5 text-sm font-medium text-white hover:opacity-90 disabled:opacity-60"
             >
-              {signingInAs === m.name ? "Signing in..." : m.name}
+              {signingIn ? "Signing in..." : "Log In"}
             </button>
-          ))}
-        </div>
+          </form>
+        )}
 
         {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
       </div>
