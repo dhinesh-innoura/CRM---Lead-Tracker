@@ -129,7 +129,7 @@ export default async function LeadsSection({
   // Accurate tab counts for New Leads, All Leads, and Active Leads
   const [newCountRes, allCountRes, activeCountRes] = await Promise.all([
     tabs.includes("new")
-      ? scoped(supabase.from("leads").select("id", { count: "exact", head: true })).or("status.eq.new,status.is.null")
+      ? scoped(supabase.from("leads").select("id", { count: "exact", head: true })).is("status", null)
       : Promise.resolve({ count: 0 }),
     scoped(supabase.from("leads").select("id", { count: "exact", head: true })),
     scoped(supabase.from("leads").select("id", { count: "exact", head: true })).or(
@@ -144,7 +144,7 @@ export default async function LeadsSection({
   // Build query for the currently active tab
   let currentTabQuery = scoped(supabase.from("leads").select("*"));
   if (tab === "new") {
-    currentTabQuery = currentTabQuery.or("status.eq.new,status.is.null");
+    currentTabQuery = currentTabQuery.is("status", null);
   } else if (tab === "active") {
     currentTabQuery = currentTabQuery.or(
       `is_active_lead.eq.true,status.in.(${ACTIVE_PIPELINE_STATUSES.join(",")})`

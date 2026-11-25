@@ -1,19 +1,15 @@
 export type UserRole = "admin" | "bdo";
 
+// Keep in sync with the `lead_status` Postgres enum (supabase/migrations/0010_manual_status_workflow.sql).
+// This is the exact 9-value set the manual status workflow (and its per-status
+// modals) is built around — do not widen it without a matching DB migration.
 export type LeadStatus =
-  | "new"
   | "outreach_initiated"
-  | "contacted"
   | "follow_up"
-  | "interested"
   | "meeting_scheduled"
   | "response_received"
   | "no_response"
   | "meeting_completed"
-  | "demo_scheduled"
-  | "demo_completed"
-  | "proposal_sent"
-  | "negotiation"
   | "successfully_converted"
   | "meeting_rescheduled"
   | "on_hold";
@@ -198,37 +194,24 @@ export interface EventLead {
 }
 
 export const LEAD_STATUSES: LeadStatus[] = [
-  "new",
-  "contacted",
   "outreach_initiated",
   "follow_up",
-  "interested",
   "meeting_scheduled",
-  "meeting_completed",
-  "demo_scheduled",
-  "demo_completed",
-  "proposal_sent",
-  "negotiation",
   "response_received",
   "no_response",
+  "meeting_completed",
+  "successfully_converted",
   "meeting_rescheduled",
   "on_hold",
-  "successfully_converted",
 ];
 
 // Active pipeline statuses (for Active Leads tabs in Own Leads, Assigned Leads, and Event Leads)
 export const ACTIVE_PIPELINE_STATUSES: LeadStatus[] = [
-  "contacted",
-  "interested",
-  "meeting_scheduled",
-  "meeting_completed",
-  "demo_scheduled",
-  "demo_completed",
-  "proposal_sent",
-  "negotiation",
   "outreach_initiated",
   "follow_up",
+  "meeting_scheduled",
   "response_received",
+  "meeting_rescheduled",
 ];
 
 // Statuses that need a structured modal before committing, rather than a
@@ -265,19 +248,12 @@ export const SOURCE_LABELS: Record<string, string> = {
 };
 
 export const STATUS_LABELS: Record<LeadStatus, string> = {
-  new: "New",
-  contacted: "Contacted",
   outreach_initiated: "Outreach Initiated",
   follow_up: "Follow Up",
-  interested: "Interested",
   meeting_scheduled: "Meeting Scheduled",
-  meeting_completed: "Meeting Completed",
-  demo_scheduled: "Demo Scheduled",
-  demo_completed: "Demo Completed",
-  proposal_sent: "Proposal Sent",
-  negotiation: "Negotiation",
   response_received: "Response Received",
   no_response: "No Response",
+  meeting_completed: "Meeting Completed",
   successfully_converted: "Successfully Converted",
   meeting_rescheduled: "Meeting Rescheduled",
   on_hold: "On Hold",

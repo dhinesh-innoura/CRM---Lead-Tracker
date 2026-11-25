@@ -38,7 +38,7 @@ export async function createLead(formData: FormData) {
     assigned_by: assignedTo ? user.id : null,
     assigned_at: assignedTo ? new Date().toISOString() : null,
     priority: (formData.get("priority") as LeadPriority) || "medium",
-    status: (formData.get("status") as LeadStatus) || "new",
+    status: (formData.get("status") as LeadStatus) || null,
     notes: formData.get("notes") || null,
     event_id: eventId || null,
   };
@@ -412,7 +412,7 @@ export async function createLeadsManually(
       solutions: clean(r.solutions),
       products: clean(r.products),
       ai_synergy: clean(r.ai_synergy),
-      status: (clean(r.status) as LeadStatus) ?? "new",
+      status: (clean(r.status) as LeadStatus) ?? null,
       applications: clean(r.applications),
       partners: clean(r.partners),
       annual_revenue: clean(r.annual_revenue),

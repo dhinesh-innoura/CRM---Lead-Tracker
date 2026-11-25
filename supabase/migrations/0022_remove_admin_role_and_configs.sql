@@ -40,7 +40,6 @@ begin
       update public.leads set assigned_to = v_primary_id where assigned_to = v_duplicate_id;
       update public.activities set actor_id = v_primary_id where actor_id = v_duplicate_id;
       update public.meetings set created_by = v_primary_id where created_by = v_duplicate_id;
-      update public.follow_ups set created_by = v_primary_id where created_by = v_duplicate_id;
       update public.responses set recorded_by = v_primary_id where recorded_by = v_duplicate_id;
       update public.notifications set recipient_id = v_primary_id where recipient_id = v_duplicate_id;
 
@@ -87,7 +86,9 @@ begin
 end;
 $$;
 
--- 4. Update profiles policies so active team members can manage profiles
-drop policy if exists profiles_admin_all on public.profiles;
-create policy profiles_admin_all on public.profiles for all
-  using (is_active_member()) with check (is_active_member());
+-- 4. (Intentionally not widening profiles_admin_all to is_active_member(): that
+-- would let any active BDO select/insert/update/delete any profile, including
+-- role escalation and deleting other accounts. profiles_admin_all stays
+-- admin-gated; profiles_update_self plus the protect_profile_privileges
+-- trigger (0017) already let every user manage their own non-privileged
+-- fields, which covers the actual need here.
