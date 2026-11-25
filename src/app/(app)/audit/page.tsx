@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireUser } from "@/lib/data";
+import { requireAdminPage } from "@/lib/require-admin";
 import { getProfiles, getAllProfilesMap } from "@/lib/data";
 import type { Activity } from "@/lib/supabase/types";
 
@@ -24,7 +24,7 @@ export default async function AuditLogPage({
 }: {
   searchParams: Promise<{ actor?: string }>;
 }) {
-  const { supabase } = await requireUser();
+  const { supabase } = await requireAdminPage();
   const profiles = await getProfiles();
   const profileMap = await getAllProfilesMap();
   const { actor } = await searchParams;
@@ -87,7 +87,9 @@ export default async function AuditLogPage({
             ))}
             {(!data || data.length === 0) && (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-gray-400">No activity recorded yet.</td>
+                <td colSpan={4} className="px-4 py-8 text-center text-gray-400">
+                  No activity recorded yet.
+                </td>
               </tr>
             )}
           </tbody>

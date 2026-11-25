@@ -1,4 +1,4 @@
-export type UserRole = "bdo";
+export type UserRole = "admin" | "bdo";
 
 export type LeadStatus =
   | "new"

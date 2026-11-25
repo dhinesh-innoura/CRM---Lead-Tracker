@@ -1,11 +1,9 @@
-import { requireUser } from "@/lib/data";
-
-
+import { requireAdminPage } from "@/lib/require-admin";
 import { getProfiles } from "@/lib/data";
 import type { Lead } from "@/lib/supabase/types";
 
 export default async function ReportsPage() {
-  const { supabase } = await requireUser();
+  const { supabase } = await requireAdminPage();
   const profiles = await getProfiles();
 
   const [{ data: leads }, { data: meetings }, { data: rawProfiles }] = await Promise.all([

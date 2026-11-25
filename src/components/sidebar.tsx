@@ -14,7 +14,7 @@ import {
   UsersRound,
   BarChart3,
   Bell,
-  Link as LinkedinIcon,
+  Settings,
   ScrollText,
   CalendarRange,
 } from "lucide-react";
@@ -28,11 +28,11 @@ const NAV = [
   { href: "/followups", label: "Follow-ups", icon: Clock },
   { href: "/responses", label: "Responses", icon: MessageSquare },
   { href: "/meetings", label: "Meetings", icon: CalendarDays },
-  { href: "/linkedin", label: "LinkedIn", icon: LinkedinIcon },
   { href: "/team", label: "Team Management", icon: UsersRound },
   { href: "/reports", label: "Reports & Analytics", icon: BarChart3 },
   { href: "/notifications", label: "Notifications", icon: Bell },
   { href: "/audit", label: "Audit Log", icon: ScrollText },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export default function Sidebar({

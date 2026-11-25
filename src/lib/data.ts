@@ -20,8 +20,29 @@ export async function requireUser() {
 }
 
 export function sanitizeProfiles(profiles: Profile[]): Profile[] {
-  // No longer drop admin accounts; keep all profiles and sort by name.
-  return profiles.sort((a, b) => a.full_name.localeCompare(b.full_name));
+  // If a user has both an admin and a user (bdo) account (like Dhinesh and Sujitha in dual-role setup),
+  // remove the admin account and keep the user account.
+  const byName = new Map<string, Profile[]>();
+  for (const p of profiles) {
+    const key = p.full_name.toLowerCase().trim();
+    const list = byName.get(key) ?? [];
+    list.push(p);
+    byName.set(key, list);
+  }
+
+  const result: Profile[] = [];
+  for (const [, list] of byName) {
+    if (list.length === 1) {
+      const p = list[0];
+      result.push(p.role === "admin" ? { ...p, role: "bdo" } : p);
+    } else {
+      // Find the user/bdo account, dropping the admin part
+      const userProfile = list.find((p) => p.role !== "admin") ?? list[0];
+      result.push(userProfile.role === "admin" ? { ...userProfile, role: "bdo" } : userProfile);
+    }
+  }
+
+  return result.sort((a, b) => a.full_name.localeCompare(b.full_name));
 }
 
 export async function getProfiles() {
