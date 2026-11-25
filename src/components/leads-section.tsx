@@ -292,6 +292,14 @@ export default async function LeadsSection({
         >
           Export {tab === "all" ? allTabLabel : TAB_LABELS[tab]}
         </a>
+        <a
+          href={`/api/export/template?columns=${encodeURIComponent(
+            JSON.stringify(columns.filter((c) => c.visible && c.key !== "action").map((c) => c.label))
+          )}`}
+          className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        >
+          Download Excel Template
+        </a>
       </div>
 
       <div className="space-y-3">
