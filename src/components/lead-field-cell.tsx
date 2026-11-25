@@ -17,12 +17,22 @@ export default function LeadFieldCell({
   type?: "text" | "date";
 }) {
   const [value, setValue] = useState(initialValue);
+  const [savedValue, setSavedValue] = useState(initialValue);
   const [isPending, startTransition] = useTransition();
 
   function commit(nextValue: string) {
-    if (nextValue !== initialValue) {
-      startTransition(() => updateLeadField(leadId, field, nextValue));
-    }
+    if (nextValue === savedValue) return;
+    startTransition(async () => {
+      try {
+        await updateLeadField(leadId, field, nextValue);
+        setSavedValue(nextValue);
+      } catch (err) {
+        // Revert instead of letting the error bubble up and crash the page —
+        // the field would otherwise look saved while nothing hit the DB.
+        setValue(savedValue);
+        console.error(err instanceof Error ? err.message : "Failed to save field");
+      }
+    });
   }
 
   const className =

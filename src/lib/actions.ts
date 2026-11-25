@@ -358,7 +358,10 @@ const EDITABLE_LEAD_FIELDS = new Set([
 export async function updateLeadField(leadId: string, field: string, value: string) {
   if (!EDITABLE_LEAD_FIELDS.has(field)) throw new Error("Field is not editable");
   const supabase = await createClient();
-  const { error } = await supabase.from("leads").update({ [field]: value }).eq("id", leadId);
+  // Date/other typed columns reject "" (e.g. clearing a date input), so
+  // treat a blank value as "no value" rather than letting it error out.
+  const cleanValue = value.trim() === "" ? null : value;
+  const { error } = await supabase.from("leads").update({ [field]: cleanValue }).eq("id", leadId);
   if (error) throw new Error(error.message);
   revalidateLeadPaths(leadId);
 }
