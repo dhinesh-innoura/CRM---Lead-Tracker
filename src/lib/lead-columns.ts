@@ -7,14 +7,13 @@ export const LOCKED_COLUMN_KEYS = ["outreach_date", "last_outreach_date"];
 
 // Columns that exist and can be turned on via Customize Columns / included in
 // exports, but shouldn't clutter the table by default.
-const DEFAULT_HIDDEN_KEYS = ["company_website", "country", "industry", "location", "contact_email", "priority", "notes"];
+const DEFAULT_HIDDEN_KEYS = ["company_website", "country", "industry", "contact_email", "priority", "notes"];
 
 export const FIXED_COLUMNS: { key: string; label: string; locked?: boolean }[] = [
   { key: "company", label: "Company" },
   { key: "company_website", label: "Website URL" },
   { key: "country", label: "Country" },
   { key: "industry", label: "Industry" },
-  { key: "location", label: "Location" },
   { key: "about_company", label: "About Company" },
   { key: "outreach_date", label: "Outreach Date", locked: true },
   { key: "last_outreach_date", label: "Last Outreach Date", locked: true },

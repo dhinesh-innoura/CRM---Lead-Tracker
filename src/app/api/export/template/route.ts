@@ -7,7 +7,6 @@ const TEMPLATE_HEADERS = [
   "Website URL",
   "Country",
   "Industry",
-  "Location",
   "About Company",
   "Outreach Date",
   "Last Outreach Date",

@@ -28,8 +28,6 @@ export default function LeadCell({ lead, columnKey }: { lead: Lead; columnKey: s
       return <LeadFieldCell leadId={lead.id} field="country" initialValue={lead.country ?? ""} />;
     case "industry":
       return <LeadFieldCell leadId={lead.id} field="industry" initialValue={lead.industry ?? ""} />;
-    case "location":
-      return <LeadFieldCell leadId={lead.id} field="location" initialValue={lead.location ?? ""} />;
     case "about_company":
       return (
         <LeadFieldCell
