@@ -61,12 +61,14 @@ export default function ImportClient({
   defaultSource,
   defaultStatus,
   eventId,
+  assignToSelf,
   onImported,
 }: {
   fieldDefs?: LeadFieldDef[];
   defaultSource?: LeadSource;
   defaultStatus?: string;
   eventId?: string;
+  assignToSelf?: boolean;
   onImported?: () => void;
 }) {
   const router = useRouter();
@@ -107,6 +109,7 @@ export default function ImportClient({
         defaultSource,
         defaultStatus,
         eventId,
+        assignToSelf,
       });
       setResult(res);
       router.refresh();

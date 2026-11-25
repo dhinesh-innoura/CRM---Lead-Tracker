@@ -28,11 +28,13 @@ export default function AddLeadModal({
   defaultSource,
   defaultStatus,
   eventId,
+  assignToSelf,
 }: {
   fieldDefs: LeadFieldDef[];
   defaultSource?: LeadSource;
   defaultStatus?: LeadStatus;
   eventId?: string;
+  assignToSelf?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [rows, setRows] = useState<Row[]>([emptyRow()]);
@@ -62,7 +64,7 @@ export default function AddLeadModal({
     const payload = rows.map((r) => ({ ...r, custom_fields: r.customValues }));
     startTransition(async () => {
       try {
-        await createLeadsManually(payload, { defaultSource, defaultStatus, eventId });
+        await createLeadsManually(payload, { defaultSource, defaultStatus, eventId, assignToSelf });
         setRows([emptyRow()]);
         setOpen(false);
       } catch (e) {

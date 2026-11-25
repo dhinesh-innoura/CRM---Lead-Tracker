@@ -388,7 +388,12 @@ export interface ManualLeadRow {
 
 export async function createLeadsManually(
   rows: ManualLeadRow[],
-  overrides?: { defaultSource?: LeadSource; defaultStatus?: LeadStatus; eventId?: string }
+  overrides?: {
+    defaultSource?: LeadSource;
+    defaultStatus?: LeadStatus;
+    eventId?: string;
+    assignToSelf?: boolean;
+  }
 ) {
   const supabase = await createClient();
   const {
@@ -427,6 +432,9 @@ export async function createLeadsManually(
       event_id: overrides?.eventId ?? null,
       owner_id: user.id,
       created_by: user.id,
+      ...(overrides?.assignToSelf
+        ? { assigned_to: user.id, assigned_by: user.id, assigned_at: new Date().toISOString() }
+        : {}),
     }));
 
   if (payloads.length === 0) throw new Error("At least one row needs a company name");

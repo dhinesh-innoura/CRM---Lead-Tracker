@@ -277,12 +277,14 @@ export default async function LeadsSection({
           eventId={eventId}
           defaultSource={sourceFilter?.[0]}
           defaultStatus={tab === "new" ? undefined : "outreach_initiated"}
+          assignToSelf={viewMode === "assigned"}
         />
         <ImportModal
           fieldDefs={fieldDefs}
           eventId={eventId}
           defaultSource={sourceFilter?.[0]}
           defaultStatus={tab === "new" ? undefined : "outreach_initiated"}
+          assignToSelf={viewMode === "assigned"}
         />
         <a
           href={`/api/export/leads?ids=${exportIds}`}

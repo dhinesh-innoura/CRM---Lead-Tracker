@@ -29,7 +29,12 @@ export async function importLeads(
   mapping: Record<string, string>,
   rows: ImportRow[],
   onDuplicate: "skip" | "update",
-  overrides?: { defaultSource?: LeadSource; defaultStatus?: string; eventId?: string }
+  overrides?: {
+    defaultSource?: LeadSource;
+    defaultStatus?: string;
+    eventId?: string;
+    assignToSelf?: boolean;
+  }
 ): Promise<ImportResult> {
   const supabase = await createClient();
   const {
@@ -119,6 +124,9 @@ export async function importLeads(
       notes: get("notes") || null,
       custom_fields: customFields,
       event_id: overrides?.eventId ?? null,
+      ...(overrides?.assignToSelf
+        ? { assigned_to: user?.id ?? null, assigned_by: user?.id ?? null, assigned_at: new Date().toISOString() }
+        : {}),
     };
 
     if (existingId) {
