@@ -86,6 +86,8 @@ export interface Lead {
   priority: LeadPriority;
   status: LeadStatus | null;
   last_contacted_at: string | null;
+  outreach_date: string | null;
+  last_outreach_date: string | null;
   next_follow_up_date: string | null;
   notes: string | null;
   response_text: string | null;

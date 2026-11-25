@@ -339,6 +339,8 @@ const EDITABLE_LEAD_FIELDS = new Set([
   "country",
   "location",
   "about_company",
+  "outreach_date",
+  "last_outreach_date",
   "contact_name",
   "contact_linkedin_url",
   "about_person",
@@ -365,6 +367,8 @@ export interface ManualLeadRow {
   country?: string;
   location?: string;
   about_company?: string;
+  outreach_date?: string;
+  last_outreach_date?: string;
   contact_name?: string;
   contact_linkedin_url?: string;
   about_person?: string;
@@ -403,6 +407,8 @@ export async function createLeadsManually(
       country: clean(r.country),
       location: clean(r.location),
       about_company: clean(r.about_company),
+      outreach_date: clean(r.outreach_date),
+      last_outreach_date: clean(r.last_outreach_date),
       contact_name: clean(r.contact_name),
       contact_linkedin_url: clean(r.contact_linkedin_url),
       about_person: clean(r.about_person),

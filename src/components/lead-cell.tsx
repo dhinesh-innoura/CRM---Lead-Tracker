@@ -32,8 +32,18 @@ export default function LeadCell({ lead, columnKey }: { lead: Lead; columnKey: s
           multiline
         />
       );
+    case "outreach_date":
+      return <LeadFieldCell leadId={lead.id} field="outreach_date" initialValue={lead.outreach_date ?? ""} type="date" />;
+    case "last_outreach_date":
+      return (
+        <LeadFieldCell leadId={lead.id} field="last_outreach_date" initialValue={lead.last_outreach_date ?? ""} type="date" />
+      );
     case "contact":
       return <LeadFieldCell leadId={lead.id} field="contact_name" initialValue={lead.contact_name ?? ""} />;
+    case "contact_linkedin_url":
+      return (
+        <LeadFieldCell leadId={lead.id} field="contact_linkedin_url" initialValue={lead.contact_linkedin_url ?? ""} />
+      );
     case "about_person":
       return <LeadFieldCell leadId={lead.id} field="about_person" initialValue={lead.about_person ?? ""} multiline />;
     case "source":

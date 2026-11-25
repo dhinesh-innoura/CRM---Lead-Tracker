@@ -18,6 +18,12 @@ const VALID_SOURCES: LeadSource[] = ["linkedin", "prem_sir", "ai"];
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+function parseDateOrNull(value: string): string | null {
+  if (!value.trim()) return null;
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
+}
+
 export async function importLeads(
   fileName: string,
   mapping: Record<string, string>,
@@ -87,6 +93,8 @@ export async function importLeads(
       company_name: companyName,
       company_website: get("company_website") || null,
       about_company: get("about_company") || null,
+      outreach_date: parseDateOrNull(get("outreach_date")),
+      last_outreach_date: parseDateOrNull(get("last_outreach_date")),
       contact_name: get("contact_name") || null,
       contact_linkedin_url: get("contact_linkedin_url") || null,
       about_person: get("about_person") || null,

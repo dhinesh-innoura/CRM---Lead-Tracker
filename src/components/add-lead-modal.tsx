@@ -149,6 +149,25 @@ export default function AddLeadModal({
                   </div>
 
                   <div>
+                    <label className={labelClass}>Outreach Date</label>
+                    <input
+                      type="date"
+                      value={row.outreach_date ?? ""}
+                      onChange={(e) => updateRow(i, "outreach_date", e.target.value)}
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Last Outreach Date</label>
+                    <input
+                      type="date"
+                      value={row.last_outreach_date ?? ""}
+                      onChange={(e) => updateRow(i, "last_outreach_date", e.target.value)}
+                      className={inputClass}
+                    />
+                  </div>
+
+                  <div>
                     <label className={labelClass}>Contact Person</label>
                     <input
                       value={row.contact_name ?? ""}

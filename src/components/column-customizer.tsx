@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { GripVertical, Eye, EyeOff, Settings2 } from "lucide-react";
+import { GripVertical, Eye, EyeOff, Settings2, Lock } from "lucide-react";
 import Modal from "@/components/modal";
 import { saveColumnPrefs } from "@/lib/actions";
 import { buildDefaultColumns, type ColumnPref } from "@/lib/lead-columns";
@@ -25,10 +25,13 @@ export default function ColumnCustomizer({
   }
 
   function toggleVisible(key: string) {
-    setDraft((prev) => prev.map((c) => (c.key === key ? { ...c, visible: !c.visible } : c)));
+    setDraft((prev) =>
+      prev.map((c) => (c.key === key && !c.locked ? { ...c, visible: !c.visible } : c))
+    );
   }
 
   function moveTo(from: number, to: number) {
+    if (draft[from]?.locked) return;
     setDraft((prev) => {
       const next = [...prev];
       const [moved] = next.splice(from, 1);
@@ -72,26 +75,35 @@ export default function ColumnCustomizer({
             {draft.map((col, i) => (
               <div
                 key={col.key}
-                draggable
-                onDragStart={() => setDragIndex(i)}
+                draggable={!col.locked}
+                onDragStart={() => !col.locked && setDragIndex(i)}
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={() => {
-                  if (dragIndex !== null && dragIndex !== i) moveTo(dragIndex, i);
+                  if (!col.locked && dragIndex !== null && dragIndex !== i) moveTo(dragIndex, i);
                   setDragIndex(null);
                 }}
                 onDragEnd={() => setDragIndex(null)}
                 className={`flex items-center gap-3 rounded-xl border px-4 py-3 ${
                   dragIndex === i ? "border-[var(--brand)] bg-cyan-50/40" : "border-gray-200"
-                }`}
+                } ${col.locked ? "bg-gray-50" : ""}`}
               >
-                <GripVertical size={16} className="shrink-0 cursor-grab text-gray-400" />
+                {col.locked ? (
+                  <Lock size={16} className="shrink-0 text-gray-400" />
+                ) : (
+                  <GripVertical size={16} className="shrink-0 cursor-grab text-gray-400" />
+                )}
                 <span className="flex-1 text-sm font-medium text-[#1c2024]">
                   {col.label}
                   {col.custom && <span className="ml-1 text-xs text-gray-400">(custom)</span>}
+                  {col.locked && <span className="ml-1 text-xs text-gray-400">(always visible)</span>}
                 </span>
-                <button onClick={() => toggleVisible(col.key)} className="text-[var(--brand)]">
-                  {col.visible ? <Eye size={18} /> : <EyeOff size={18} className="text-gray-300" />}
-                </button>
+                {col.locked ? (
+                  <Eye size={18} className="text-gray-300" />
+                ) : (
+                  <button onClick={() => toggleVisible(col.key)} className="text-[var(--brand)]">
+                    {col.visible ? <Eye size={18} /> : <EyeOff size={18} className="text-gray-300" />}
+                  </button>
+                )}
               </div>
             ))}
           </div>

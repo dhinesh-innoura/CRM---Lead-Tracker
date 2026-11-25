@@ -9,6 +9,8 @@ const EXPORT_COLUMNS: { key: string; label: string }[] = [
   { key: "industry", label: "Industry" },
   { key: "company_website", label: "Website URL" },
   { key: "about_company", label: "About Company" },
+  { key: "outreach_date", label: "Outreach Date" },
+  { key: "last_outreach_date", label: "Last Outreach Date" },
   { key: "contact_name", label: "Contact Person" },
   { key: "contact_email", label: "Business Email" },
   { key: "contact_linkedin_url", label: "LinkedIn URL" },

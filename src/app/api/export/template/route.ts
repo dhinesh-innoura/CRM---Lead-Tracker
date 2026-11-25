@@ -6,6 +6,8 @@ const TEMPLATE_HEADERS = [
   "Company",
   "Website URL",
   "About Company",
+  "Outreach Date",
+  "Last Outreach Date",
   "Contact Person",
   "LinkedIn URL",
   "About Person",

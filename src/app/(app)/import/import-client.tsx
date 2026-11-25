@@ -9,6 +9,8 @@ const FIELDS: { key: string; label: string; required?: boolean }[] = [
   { key: "company_name", label: "Company", required: true },
   { key: "company_website", label: "Website URL" },
   { key: "about_company", label: "About Company" },
+  { key: "outreach_date", label: "Outreach Date" },
+  { key: "last_outreach_date", label: "Last Outreach Date" },
   { key: "contact_name", label: "Contact Person" },
   { key: "contact_linkedin_url", label: "LinkedIn URL" },
   { key: "about_person", label: "About Person" },
