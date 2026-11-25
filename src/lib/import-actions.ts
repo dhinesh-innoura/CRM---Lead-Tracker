@@ -29,7 +29,7 @@ export async function importLeads(
   mapping: Record<string, string>,
   rows: ImportRow[],
   onDuplicate: "skip" | "update",
-  overrides?: { defaultSource?: LeadSource; eventId?: string }
+  overrides?: { defaultSource?: LeadSource; defaultStatus?: string; eventId?: string }
 ): Promise<ImportResult> {
   const supabase = await createClient();
   const {
@@ -80,7 +80,13 @@ export async function importLeads(
       ((VALID_SOURCES.includes(sourceRaw as LeadSource) ? sourceRaw : "linkedin") as LeadSource);
 
     const statusRaw = get("status").toLowerCase().replace(/\s+/g, "_");
-    const status = (LEAD_STATUSES.includes(statusRaw as LeadStatus) ? statusRaw : null) as LeadStatus | null;
+    const defaultStatus =
+      overrides?.defaultStatus && LEAD_STATUSES.includes(overrides.defaultStatus as LeadStatus)
+        ? (overrides.defaultStatus as LeadStatus)
+        : null;
+    const status = (
+      LEAD_STATUSES.includes(statusRaw as LeadStatus) ? statusRaw : defaultStatus
+    ) as LeadStatus | null;
 
     const customFields: Record<string, string> = {};
     for (const key of customFieldKeys) {

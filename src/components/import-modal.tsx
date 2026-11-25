@@ -8,10 +8,12 @@ import type { LeadFieldDef, LeadSource } from "@/lib/supabase/types";
 export default function ImportModal({
   fieldDefs,
   defaultSource,
+  defaultStatus,
   eventId,
 }: {
   fieldDefs: LeadFieldDef[];
   defaultSource?: LeadSource;
+  defaultStatus?: string;
   eventId?: string;
 }) {
   const [open, setOpen] = useState(false);
@@ -32,7 +34,13 @@ export default function ImportModal({
           onClose={() => setOpen(false)}
           wide
         >
-          <ImportClient fieldDefs={fieldDefs} defaultSource={defaultSource} eventId={eventId} />
+          <ImportClient
+            fieldDefs={fieldDefs}
+            defaultSource={defaultSource}
+            defaultStatus={defaultStatus}
+            eventId={eventId}
+            onImported={() => setOpen(false)}
+          />
         </Modal>
       )}
     </>

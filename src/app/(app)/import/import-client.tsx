@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import * as XLSX from "xlsx";
 import { importLeads, type ImportResult } from "@/lib/import-actions";
 import type { LeadFieldDef, LeadSource } from "@/lib/supabase/types";
@@ -29,15 +30,28 @@ const FIELDS: { key: string; label: string; required?: boolean }[] = [
 
 function guessMapping(headers: string[]) {
   const mapping: Record<string, string> = {};
+  const usedHeaders = new Set<string>();
   const normalize = (s: string) => s.toLowerCase().replace(/[^a-z]/g, "");
 
   for (const field of FIELDS) {
     const fieldNorm = normalize(field.key);
-    const match = headers.find((h) => {
-      const hNorm = normalize(h);
-      return hNorm === fieldNorm || hNorm.includes(fieldNorm) || fieldNorm.includes(hNorm);
-    });
-    if (match) mapping[field.key] = match;
+    const available = headers.filter((h) => !usedHeaders.has(h));
+
+    // Prefer an exact normalized match; only fall back to a substring match
+    // (and only against a reasonably long header) so a short/ambiguous
+    // header like "Company" can't also get claimed by "Company Website".
+    const exact = available.find((h) => normalize(h) === fieldNorm);
+    const match =
+      exact ??
+      available.find((h) => {
+        const hNorm = normalize(h);
+        return hNorm.length >= 4 && (hNorm.includes(fieldNorm) || fieldNorm.includes(hNorm));
+      });
+
+    if (match) {
+      mapping[field.key] = match;
+      usedHeaders.add(match);
+    }
   }
   return mapping;
 }
@@ -45,12 +59,17 @@ function guessMapping(headers: string[]) {
 export default function ImportClient({
   fieldDefs = [],
   defaultSource,
+  defaultStatus,
   eventId,
+  onImported,
 }: {
   fieldDefs?: LeadFieldDef[];
   defaultSource?: LeadSource;
+  defaultStatus?: string;
   eventId?: string;
+  onImported?: () => void;
 }) {
+  const router = useRouter();
   const allFields: { key: string; label: string; required?: boolean }[] = [
     ...FIELDS.filter((f) => !(defaultSource && f.key === "source")),
     ...fieldDefs.map((f) => ({ key: `custom:${f.key}`, label: f.label, required: false })),
@@ -84,8 +103,16 @@ export default function ImportClient({
   async function handleImport() {
     setImporting(true);
     try {
-      const res = await importLeads(fileName, mapping, rows, onDuplicate, { defaultSource, eventId });
+      const res = await importLeads(fileName, mapping, rows, onDuplicate, {
+        defaultSource,
+        defaultStatus,
+        eventId,
+      });
       setResult(res);
+      router.refresh();
+      if (res.errorRows === 0) {
+        onImported?.();
+      }
     } finally {
       setImporting(false);
     }

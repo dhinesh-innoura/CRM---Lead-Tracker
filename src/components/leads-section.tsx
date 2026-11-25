@@ -243,7 +243,12 @@ export default async function LeadsSection({
 
       <div className="flex items-center justify-end gap-2">
         <AddLeadModal fieldDefs={fieldDefs} eventId={eventId} defaultSource={sourceFilter?.[0]} />
-        <ImportModal fieldDefs={fieldDefs} eventId={eventId} defaultSource={sourceFilter?.[0]} />
+        <ImportModal
+          fieldDefs={fieldDefs}
+          eventId={eventId}
+          defaultSource={sourceFilter?.[0]}
+          defaultStatus={tab === "new" ? undefined : "outreach_initiated"}
+        />
         <a
           href={`/api/export/leads?ids=${exportIds}`}
           className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
