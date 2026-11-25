@@ -25,8 +25,7 @@ export default async function AuditLogPage({
   searchParams: Promise<{ actor?: string }>;
 }) {
   const { supabase } = await requireAdminPage();
-  const profiles = await getProfiles();
-  const profileMap = await getAllProfilesMap();
+  const [profiles, profileMap] = await Promise.all([getProfiles(), getAllProfilesMap()]);
   const { actor } = await searchParams;
 
   let query = supabase

@@ -1,8 +1,11 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import type { Profile } from "@/lib/supabase/types";
 
-export async function requireUser() {
+// Deduped per request: the layout and the page both call requireUser(), and
+// without this they'd each hit Supabase auth + the profiles table separately.
+export const requireUser = cache(async () => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -17,7 +20,7 @@ export async function requireUser() {
     .single();
 
   return { supabase, user, profile: profile as Profile | null };
-}
+});
 
 export function sanitizeProfiles(profiles: Profile[]): Profile[] {
   // If a user has both an admin and a user (bdo) account (like Dhinesh and Sujitha in dual-role setup),
@@ -45,7 +48,7 @@ export function sanitizeProfiles(profiles: Profile[]): Profile[] {
   return result.sort((a, b) => a.full_name.localeCompare(b.full_name));
 }
 
-export async function getProfiles() {
+export const getProfiles = cache(async () => {
   const supabase = await createClient();
   const { data } = await supabase
     .from("profiles")
@@ -53,9 +56,9 @@ export async function getProfiles() {
     .eq("is_active", true)
     .order("full_name");
   return sanitizeProfiles((data ?? []) as Profile[]);
-}
+});
 
-export async function getAllProfilesMap() {
+export const getAllProfilesMap = cache(async () => {
   const supabase = await createClient();
   const { data } = await supabase.from("profiles").select("*");
   const map = new Map<string, string>();
@@ -63,4 +66,4 @@ export async function getAllProfilesMap() {
     map.set(p.id, p.full_name);
   }
   return map;
-}
+});

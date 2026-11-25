@@ -32,20 +32,26 @@ const ACTIVITY_LABELS: Record<string, string> = {
 
 export default async function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { supabase } = await requireUser();
-  const profiles = await getProfiles();
-  const allProfilesMap = await getAllProfilesMap();
+  const [{ supabase }, profiles, allProfilesMap] = await Promise.all([
+    requireUser(),
+    getProfiles(),
+    getAllProfilesMap(),
+  ]);
 
-  const { data: lead } = await supabase.from("leads").select("*").eq("id", id).single();
+  const [
+    { data: lead },
+    { data: activities },
+    { data: meetings },
+    { data: fieldDefsData },
+    { data: eventLeadsData },
+  ] = await Promise.all([
+    supabase.from("leads").select("*").eq("id", id).single(),
+    supabase.from("activities").select("*").eq("lead_id", id).order("created_at", { ascending: false }),
+    supabase.from("meetings").select("*").eq("lead_id", id).order("meeting_date", { ascending: false }),
+    supabase.from("lead_field_defs").select("*").order("position", { ascending: true }),
+    supabase.from("event_leads").select("events(id, name)").eq("lead_id", id),
+  ]);
   if (!lead) notFound();
-
-  const [{ data: activities }, { data: meetings }, { data: fieldDefsData }, { data: eventLeadsData }] =
-    await Promise.all([
-      supabase.from("activities").select("*").eq("lead_id", id).order("created_at", { ascending: false }),
-      supabase.from("meetings").select("*").eq("lead_id", id).order("meeting_date", { ascending: false }),
-      supabase.from("lead_field_defs").select("*").order("position", { ascending: true }),
-      supabase.from("event_leads").select("events(id, name)").eq("lead_id", id),
-    ]);
   const fieldDefs = (fieldDefsData ?? []) as LeadFieldDef[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const linkedEvents = (eventLeadsData ?? []).map((el: any) => el.events).filter(Boolean);

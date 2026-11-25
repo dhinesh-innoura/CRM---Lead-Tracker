@@ -64,9 +64,11 @@ export default async function LeadsSection({
   eventId?: string;
   viewMode?: "own" | "assigned" | "event" | "all";
 }) {
-  const { supabase, user } = await requireUser();
-  const profiles = await getProfiles();
-  const sp = await searchParams;
+  const [{ supabase, user }, profiles, sp] = await Promise.all([
+    requireUser(),
+    getProfiles(),
+    searchParams,
+  ]);
   const { q, status, country, industry, source, priority, assigned_to, from, to, sort } = sp;
   const tab = tabs.includes(sp.tab as TabKey) ? (sp.tab as TabKey) : tabs[0];
   const allTabLabel = tabs.includes("new") ? "All Leads" : "Leads";
@@ -111,23 +113,22 @@ export default async function LeadsSection({
     return q2;
   }
 
-  const { data: fieldDefsData } = await supabase
-    .from("lead_field_defs")
-    .select("*")
-    .order("position", { ascending: true });
-  const fieldDefs = (fieldDefsData ?? []) as LeadFieldDef[];
-
-  const { data: prefRow } = await supabase
-    .from("lead_table_prefs")
-    .select("columns")
-    .eq("owner_id", user.id)
-    .maybeSingle();
-  const columns = mergeColumnPrefs((prefRow?.columns as ColumnPref[]) ?? [], fieldDefs).filter(
-    (c) => showSourceColumn || c.key !== "source"
-  );
-
-  // Accurate tab counts for New Leads, All Leads, and Active Leads
-  const [newCountRes, allCountRes, activeCountRes] = await Promise.all([
+  // Independent reads — fire together instead of one round trip at a time.
+  const [
+    { data: fieldDefsData },
+    { data: prefRow },
+    { data: savedFiltersData },
+    newCountRes,
+    allCountRes,
+    activeCountRes,
+  ] = await Promise.all([
+    supabase.from("lead_field_defs").select("*").order("position", { ascending: true }),
+    supabase.from("lead_table_prefs").select("columns").eq("owner_id", user.id).maybeSingle(),
+    supabase
+      .from("saved_filters")
+      .select("*")
+      .eq("owner_id", user.id)
+      .order("created_at", { ascending: false }),
     tabs.includes("new")
       ? scoped(supabase.from("leads").select("id", { count: "exact", head: true })).is("status", null)
       : Promise.resolve({ count: 0 }),
@@ -136,6 +137,10 @@ export default async function LeadsSection({
       `is_active_lead.eq.true,status.in.(${ACTIVE_PIPELINE_STATUSES.join(",")})`
     ),
   ]);
+  const fieldDefs = (fieldDefsData ?? []) as LeadFieldDef[];
+  const columns = mergeColumnPrefs((prefRow?.columns as ColumnPref[]) ?? [], fieldDefs).filter(
+    (c) => showSourceColumn || c.key !== "source"
+  );
 
   const newCount = newCountRes.count ?? 0;
   const allCount = allCountRes.count ?? 0;
@@ -195,12 +200,7 @@ export default async function LeadsSection({
 
   const { data: leadsData } = await currentTabQuery;
   const leads = (leadsData ?? []) as Lead[];
-
-  const { data: savedFilters } = await supabase
-    .from("saved_filters")
-    .select("*")
-    .eq("owner_id", user.id)
-    .order("created_at", { ascending: false });
+  const savedFilters = savedFiltersData;
 
   const exportIds = leads.map((l) => l.id).join(",");
 
