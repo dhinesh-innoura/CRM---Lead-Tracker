@@ -30,32 +30,43 @@ export default function LinkedinPage() {
   };
   const [trackingRows, setTrackingRows] = useState<TrackingRow[]>([]);
 
-  // ----- Add button handling (Tracking tab) -----
-  const [showAddTrackingModal, setShowAddTrackingModal] = useState(false);
-  const [newCompany, setNewCompany] = useState('');
-  const [newPerson, setNewPerson] = useState('');
-  const [newProfileUrl, setNewProfileUrl] = useState('');
-  const [newStatus, setNewStatus] = useState<'response' | 'no_response'>('no_response');
-  const resetTrackingForm = () => {
-    setNewCompany('');
-    setNewPerson('');
-    setNewProfileUrl('');
-    setNewStatus('no_response');
+  // ----- Add button handling (Tracking tab, multi-row) -----
+  type DraftTrackingRow = {
+    company_name: string;
+    person_name: string;
+    person_profile_url: string;
+    status: 'response' | 'no_response';
   };
+  const emptyDraftRow = (): DraftTrackingRow => ({
+    company_name: '',
+    person_name: '',
+    person_profile_url: '',
+    status: 'no_response',
+  });
+  const [showAddTrackingModal, setShowAddTrackingModal] = useState(false);
+  const [draftRows, setDraftRows] = useState<DraftTrackingRow[]>([emptyDraftRow()]);
+
+  const updateDraftRow = (index: number, field: keyof DraftTrackingRow, value: string) => {
+    setDraftRows(prev => prev.map((row, i) => (i === index ? { ...row, [field]: value } : row)));
+  };
+  const addDraftRow = () => setDraftRows(prev => [...prev, emptyDraftRow()]);
+  const removeDraftRow = (index: number) =>
+    setDraftRows(prev => (prev.length === 1 ? prev : prev.filter((_, i) => i !== index)));
+
   const handleAddTrackingSave = () => {
-    if (!newCompany.trim() && !newPerson.trim()) return;
-    setTrackingRows(prev => [
-      ...prev,
-      {
+    const newRows: TrackingRow[] = draftRows
+      .filter(row => row.company_name.trim() || row.person_name.trim())
+      .map(row => ({
         id: crypto.randomUUID(),
-        company_name: newCompany.trim() || null,
-        person_name: newPerson.trim() || null,
-        person_profile_url: newProfileUrl.trim() || null,
-        status: newStatus,
-      },
-    ]);
+        company_name: row.company_name.trim() || null,
+        person_name: row.person_name.trim() || null,
+        person_profile_url: row.person_profile_url.trim() || null,
+        status: row.status,
+      }));
+    if (newRows.length === 0) return;
+    setTrackingRows(prev => [...prev, ...newRows]);
     setShowAddTrackingModal(false);
-    resetTrackingForm();
+    setDraftRows([emptyDraftRow()]);
   };
   const removeTrackingRow = (id: string) => {
     setTrackingRows(prev => prev.filter(row => row.id !== id));
@@ -308,59 +319,93 @@ export default function LinkedinPage() {
 
           {/* Add tracking modal */}
           {showAddTrackingModal && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black/30">
-              <div className="w-80 rounded-xl bg-white p-6 shadow-lg">
-                <h3 className="mb-4 text-lg font-semibold">Add Tracking Entry</h3>
-                <label className="mb-2 block">
-                  Company:
-                  <input
-                    type="text"
-                    value={newCompany}
-                    onChange={e => setNewCompany(e.target.value)}
-                    className="mt-1 w-full rounded border px-2 py-1"
-                  />
-                </label>
-                <label className="mb-2 block">
-                  Person:
-                  <input
-                    type="text"
-                    value={newPerson}
-                    onChange={e => setNewPerson(e.target.value)}
-                    className="mt-1 w-full rounded border px-2 py-1"
-                  />
-                </label>
-                <label className="mb-2 block">
-                  Profile URL:
-                  <input
-                    type="text"
-                    value={newProfileUrl}
-                    onChange={e => setNewProfileUrl(e.target.value)}
-                    className="mt-1 w-full rounded border px-2 py-1"
-                  />
-                </label>
-                <label className="mb-4 block">
-                  Status:
-                  <select
-                    value={newStatus}
-                    onChange={e => setNewStatus(e.target.value as 'response' | 'no_response')}
-                    className="mt-1 w-full rounded border px-2 py-1"
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">
+              <div className="flex max-h-[85vh] w-full max-w-xl flex-col rounded-xl bg-white shadow-lg">
+                <div className="border-b border-gray-100 px-6 py-4">
+                  <h3 className="text-lg font-semibold text-[#1c2024]">Add Tracking Entries</h3>
+                  <p className="mt-1 text-sm text-gray-500">Add one or more rows, then save them all together.</p>
+                </div>
+
+                <div className="space-y-4 overflow-y-auto px-6 py-4">
+                  {draftRows.map((row, i) => (
+                    <div key={i} className="rounded-lg border border-gray-200 p-4">
+                      <div className="mb-3 flex items-center justify-between">
+                        <h4 className="text-sm font-semibold text-[#1c2024]">Entry {i + 1}</h4>
+                        {draftRows.length > 1 && (
+                          <button
+                            onClick={() => removeDraftRow(i)}
+                            className="text-xs font-medium text-gray-400 hover:text-red-600"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <label className="block text-xs font-medium text-gray-600">
+                          Company
+                          <input
+                            type="text"
+                            value={row.company_name}
+                            onChange={e => updateDraftRow(i, 'company_name', e.target.value)}
+                            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                          />
+                        </label>
+                        <label className="block text-xs font-medium text-gray-600">
+                          Person
+                          <input
+                            type="text"
+                            value={row.person_name}
+                            onChange={e => updateDraftRow(i, 'person_name', e.target.value)}
+                            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                          />
+                        </label>
+                        <label className="block text-xs font-medium text-gray-600 sm:col-span-2">
+                          Profile URL
+                          <input
+                            type="text"
+                            value={row.person_profile_url}
+                            onChange={e => updateDraftRow(i, 'person_profile_url', e.target.value)}
+                            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                          />
+                        </label>
+                        <label className="block text-xs font-medium text-gray-600">
+                          Status
+                          <select
+                            value={row.status}
+                            onChange={e => updateDraftRow(i, 'status', e.target.value)}
+                            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                          >
+                            <option value="no_response">No Response</option>
+                            <option value="response">Response</option>
+                          </select>
+                        </label>
+                      </div>
+                    </div>
+                  ))}
+
+                  <button
+                    onClick={addDraftRow}
+                    className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-gray-300 py-2.5 text-sm font-medium text-gray-600 hover:border-[var(--brand)] hover:text-[var(--brand)]"
                   >
-                    <option value="no_response">No Response</option>
-                    <option value="response">Response</option>
-                  </select>
-                </label>
-                <div className="flex justify-end space-x-2">
+                    + Add Another Row
+                  </button>
+                </div>
+
+                <div className="flex justify-end gap-2 border-t border-gray-100 px-6 py-4">
                   <button
                     onClick={() => {
                       setShowAddTrackingModal(false);
-                      resetTrackingForm();
+                      setDraftRows([emptyDraftRow()]);
                     }}
-                    className="px-3 py-1 text-sm text-gray-600"
+                    className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                   >
                     Cancel
                   </button>
-                  <button onClick={handleAddTrackingSave} className="rounded bg-[var(--brand)] px-3 py-1 text-sm text-white">
-                    Save
+                  <button
+                    onClick={handleAddTrackingSave}
+                    className="rounded-lg bg-[var(--sidebar)] px-5 py-2 text-sm font-medium text-white hover:bg-black"
+                  >
+                    Save {draftRows.length > 1 ? `${draftRows.length} Entries` : 'Entry'}
                   </button>
                 </div>
               </div>
