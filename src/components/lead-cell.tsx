@@ -20,7 +20,6 @@ export default function LeadCell({ lead, columnKey }: { lead: Lead; columnKey: s
             View details →
           </Link>
           <LeadFieldCell leadId={lead.id} field="company_name" initialValue={lead.company_name ?? ""} />
-          <LeadFieldCell leadId={lead.id} field="company_website" initialValue={lead.company_website ?? ""} />
         </div>
       );
     case "about_company":
