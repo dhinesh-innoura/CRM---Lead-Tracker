@@ -5,6 +5,10 @@ import type { LeadFieldDef } from "@/lib/supabase/types";
 // mergeColumnPrefs) and excluded from drag/hide in the column customizer.
 export const LOCKED_COLUMN_KEYS = ["outreach_date", "last_outreach_date"];
 
+// Columns that exist and can be turned on via Customize Columns / included in
+// exports, but shouldn't clutter the table by default.
+const DEFAULT_HIDDEN_KEYS = ["company_website", "country", "industry", "location", "contact_email", "priority", "notes"];
+
 export const FIXED_COLUMNS: { key: string; label: string; locked?: boolean }[] = [
   { key: "company", label: "Company" },
   { key: "company_website", label: "Website URL" },
@@ -55,7 +59,7 @@ function pinLockedColumns(columns: ColumnPref[]): ColumnPref[] {
 
 export function buildDefaultColumns(fieldDefs: LeadFieldDef[]): ColumnPref[] {
   return pinLockedColumns([
-    ...FIXED_COLUMNS.map((c) => ({ ...c, visible: true })),
+    ...FIXED_COLUMNS.map((c) => ({ ...c, visible: !DEFAULT_HIDDEN_KEYS.includes(c.key) })),
     ...fieldDefs.map((f) => ({ key: `custom:${f.key}`, label: f.label, visible: true, custom: true })),
   ]);
 }
