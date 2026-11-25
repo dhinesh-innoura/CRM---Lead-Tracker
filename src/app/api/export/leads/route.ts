@@ -46,8 +46,9 @@ export async function GET(request: NextRequest) {
 
   let query = supabase.from("leads").select("*").order("created_at", { ascending: false });
 
-  if (ids) {
-    query = query.in("id", ids.split(","));
+  if (ids !== null) {
+    const idList = ids.split(",").filter(Boolean);
+    query = idList.length > 0 ? query.in("id", idList) : query.eq("id", "00000000-0000-0000-0000-000000000000");
   } else {
     if (status) query = query.eq("status", status);
     if (q) query = query.or(`company_name.ilike.%${q}%,contact_name.ilike.%${q}%,contact_email.ilike.%${q}%`);
