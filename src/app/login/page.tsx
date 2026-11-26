@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 const TEAM = [
@@ -17,6 +18,7 @@ export default function LoginPage() {
   const router = useRouter();
   const [selected, setSelected] = useState<{ name: string; email: string } | null>(null);
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [signingIn, setSigningIn] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,6 +31,7 @@ export default function LoginPage() {
   function handleBack() {
     setSelected(null);
     setPassword("");
+    setShowPassword(false);
     setError(null);
   }
 
@@ -93,14 +96,25 @@ export default function LoginPage() {
                 Hi, <span className="text-[#1c2024]">{selected.name}</span> — enter your password
               </p>
             </div>
-            <input
-              type="password"
-              autoFocus
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-[var(--brand)] focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                autoFocus
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 pr-10 text-sm focus:border-[var(--brand)] focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                tabIndex={-1}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-600"
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
             <button
               type="submit"
               disabled={signingIn || password.length === 0}
