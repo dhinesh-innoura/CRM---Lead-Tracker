@@ -5,11 +5,15 @@ import RemoveAllEventsButton from "@/components/remove-all-events-button";
 import type { LeadEvent } from "@/lib/supabase/types";
 
 export default async function EventsPage() {
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
 
   const [{ data: eventsData }, { data: eventLeadsData }, { data: legacyEventLeads }] =
     await Promise.all([
-      supabase.from("events").select("*").order("start_date", { ascending: false }),
+      supabase
+        .from("events")
+        .select("*")
+        .eq("created_by", user.id)
+        .order("start_date", { ascending: false }),
       supabase.from("event_leads").select("event_id, lead_id"),
       supabase.from("leads").select("id, event_id").not("event_id", "is", null),
     ]);

@@ -48,7 +48,13 @@ export async function deleteEvent(eventId: string) {
 
 export async function deleteAllEvents() {
   const supabase = await createClient();
-  const { error } = await supabase.from("events").delete().not("id", "is", null);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+  // Each user only sees their own events on the Events page, so "Remove
+  // All" must only remove the ones they created — not everyone's.
+  const { error } = await supabase.from("events").delete().eq("created_by", user.id);
   if (error) throw new Error(error.message);
   revalidatePath("/events");
   revalidatePath("/leads");

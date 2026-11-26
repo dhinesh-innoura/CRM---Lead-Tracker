@@ -13,9 +13,11 @@ const PAGE_SIZE = 10;
 export default function LeadsTableBulk({
   leads,
   columns,
+  eventId,
 }: {
   leads: Lead[];
   columns: ColumnPref[];
+  eventId?: string;
 }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [rawPage, setPage] = useState(0);
@@ -45,21 +47,25 @@ export default function LeadsTableBulk({
   const selectedIds = Array.from(selected);
   const colCount = 3 + visible.length;
 
+  const removeWarning = eventId
+    ? "This only removes the lead from this event — it stays in Own/Assigned Leads."
+    : "This cannot be undone.";
+
   function removeOne(id: string) {
-    if (!window.confirm("Remove this lead? This cannot be undone.")) return;
-    startDelete(() => deleteLead(id));
+    if (!window.confirm(`Remove this lead? ${removeWarning}`)) return;
+    startDelete(() => deleteLead(id, eventId));
   }
 
   function removeAll() {
     if (leads.length === 0) return;
-    if (!window.confirm(`Remove all ${leads.length} leads in this list? This cannot be undone.`)) return;
-    startDelete(() => deleteLeads(leads.map((l) => l.id)));
+    if (!window.confirm(`Remove all ${leads.length} leads in this list? ${removeWarning}`)) return;
+    startDelete(() => deleteLeads(leads.map((l) => l.id), eventId));
     setSelected(new Set());
   }
 
   function removeSelected() {
-    if (!window.confirm(`Remove ${selectedIds.length} selected lead(s)? This cannot be undone.`)) return;
-    startDelete(() => deleteLeads(selectedIds));
+    if (!window.confirm(`Remove ${selectedIds.length} selected lead(s)? ${removeWarning}`)) return;
+    startDelete(() => deleteLeads(selectedIds, eventId));
     setSelected(new Set());
   }
 
@@ -131,7 +137,7 @@ export default function LeadsTableBulk({
                 <td className="px-3 py-3 text-gray-400">{page * PAGE_SIZE + i + 1}</td>
                 {visible.map((c) => (
                   <td key={c.key} className="max-w-sm px-2 py-2">
-                    <LeadCell lead={l} columnKey={c.key} />
+                    <LeadCell lead={l} columnKey={c.key} eventId={eventId} />
                   </td>
                 ))}
                 <td className="px-3 py-3">

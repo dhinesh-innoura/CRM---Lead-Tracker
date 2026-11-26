@@ -77,10 +77,23 @@ export async function updateLeadStatus(leadId: string, status: LeadStatus) {
   revalidateLeadPaths(leadId);
 }
 
-export async function toggleLeadActive(leadId: string, isActive: boolean) {
+export async function toggleLeadActive(leadId: string, isActive: boolean, eventId?: string) {
   const supabase = await createClient();
-  const { error } = await supabase.from("leads").update({ is_active_lead: isActive }).eq("id", leadId);
-  if (error) throw new Error(error.message);
+  // On an Event Leads page, "Active" is scoped to that event only — flip the
+  // flag on the event_leads link, not on the shared master lead, so marking
+  // a lead active for one event doesn't make it active in Own/Assigned
+  // Leads or in other events it's also linked to.
+  if (eventId) {
+    const { error } = await supabase
+      .from("event_leads")
+      .update({ is_active_lead: isActive })
+      .eq("event_id", eventId)
+      .eq("lead_id", leadId);
+    if (error) throw new Error(error.message);
+  } else {
+    const { error } = await supabase.from("leads").update({ is_active_lead: isActive }).eq("id", leadId);
+    if (error) throw new Error(error.message);
+  }
   revalidateLeadPaths(leadId);
 }
 
@@ -461,20 +474,33 @@ export async function createLeadsManually(
   revalidatePath("/events", "layout");
 }
 
-export async function deleteLead(leadId: string) {
+export async function deleteLead(leadId: string, eventId?: string) {
   const supabase = await createClient();
-  const { error } = await supabase.from("leads").delete().eq("id", leadId);
-  if (error) throw new Error(error.message);
+  // On an Event Leads page, "Remove" only unlinks the lead from this event —
+  // it must not delete the shared master lead, which would also wipe it out
+  // of Own/Assigned Leads and any other event it's linked to.
+  if (eventId) {
+    const { error } = await supabase.from("event_leads").delete().eq("event_id", eventId).eq("lead_id", leadId);
+    if (error) throw new Error(error.message);
+  } else {
+    const { error } = await supabase.from("leads").delete().eq("id", leadId);
+    if (error) throw new Error(error.message);
+  }
   revalidatePath("/leads");
   revalidatePath("/leads/sir-given");
   revalidatePath("/events", "layout");
 }
 
-export async function deleteLeads(leadIds: string[]) {
+export async function deleteLeads(leadIds: string[], eventId?: string) {
   if (leadIds.length === 0) return;
   const supabase = await createClient();
-  const { error } = await supabase.from("leads").delete().in("id", leadIds);
-  if (error) throw new Error(error.message);
+  if (eventId) {
+    const { error } = await supabase.from("event_leads").delete().eq("event_id", eventId).in("lead_id", leadIds);
+    if (error) throw new Error(error.message);
+  } else {
+    const { error } = await supabase.from("leads").delete().in("id", leadIds);
+    if (error) throw new Error(error.message);
+  }
   revalidatePath("/leads");
   revalidatePath("/leads/sir-given");
   revalidatePath("/events", "layout");

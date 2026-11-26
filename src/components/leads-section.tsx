@@ -81,18 +81,28 @@ export default async function LeadsSection({
     Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1)
   ).toISOString();
 
-  // If viewing an event, fetch all linked lead IDs from event_leads
+  // If viewing an event, fetch all linked lead IDs from event_leads, along
+  // with which of them are marked active FOR THIS EVENT. "Active" here is
+  // its own event_leads.is_active_lead flag, independent of the master
+  // lead's own is_active_lead — so marking a lead active in Own Leads (or in
+  // a different event) never makes it show as active here, and vice versa.
   let eventLeadIds: string[] = [];
+  let eventActiveLeadIds: string[] = [];
   if (eventId || viewMode === "event") {
     const targetEventId = eventId;
     if (targetEventId) {
       const { data: elRows } = await supabase
         .from("event_leads")
-        .select("lead_id")
+        .select("lead_id, is_active_lead")
         .eq("event_id", targetEventId);
       eventLeadIds = (elRows ?? []).map((r) => r.lead_id);
+      eventActiveLeadIds = (elRows ?? []).filter((r) => r.is_active_lead).map((r) => r.lead_id);
     }
   }
+  const isEventView = viewMode === "event" || Boolean(eventId);
+  // Supabase `.in()`/`.not(...,"in",...)` needs a non-empty list — fall back
+  // to an id that can never match a real lead.
+  const NO_MATCH_ID = "00000000-0000-0000-0000-000000000000";
 
   // Scoping helper to filter master leads based on section logic
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -141,7 +151,9 @@ export default async function LeadsSection({
   // one tab, and a lead only graduates out of New Leads at the next day.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function applyAllTabFilter(query: any): any {
-    let q2 = query.eq("is_active_lead", false);
+    let q2 = isEventView
+      ? query.not("id", "in", `(${(eventActiveLeadIds.length > 0 ? eventActiveLeadIds : [NO_MATCH_ID]).join(",")})`)
+      : query.eq("is_active_lead", false);
     if (tabs.includes("new")) {
       q2 = q2
         .not("status", "is", null)
@@ -170,7 +182,12 @@ export default async function LeadsSection({
       ? applyNewTabFilter(scoped(supabase.from("leads").select("id", { count: "exact", head: true })))
       : Promise.resolve({ count: 0 }),
     applyAllTabFilter(scoped(supabase.from("leads").select("id", { count: "exact", head: true }))),
-    scoped(supabase.from("leads").select("id", { count: "exact", head: true })).eq("is_active_lead", true),
+    isEventView
+      ? scoped(supabase.from("leads").select("id", { count: "exact", head: true })).in(
+          "id",
+          eventActiveLeadIds.length > 0 ? eventActiveLeadIds : [NO_MATCH_ID]
+        )
+      : scoped(supabase.from("leads").select("id", { count: "exact", head: true })).eq("is_active_lead", true),
   ]);
   const fieldDefs = (fieldDefsData ?? []) as LeadFieldDef[];
   const columns = mergeColumnPrefs((prefRow?.columns as ColumnPref[]) ?? [], fieldDefs).filter(
@@ -186,7 +203,9 @@ export default async function LeadsSection({
   if (tab === "new") {
     currentTabQuery = applyNewTabFilter(currentTabQuery);
   } else if (tab === "active") {
-    currentTabQuery = currentTabQuery.eq("is_active_lead", true);
+    currentTabQuery = isEventView
+      ? currentTabQuery.in("id", eventActiveLeadIds.length > 0 ? eventActiveLeadIds : [NO_MATCH_ID])
+      : currentTabQuery.eq("is_active_lead", true);
   } else if (tab === "all") {
     currentTabQuery = applyAllTabFilter(currentTabQuery);
   }
@@ -234,7 +253,12 @@ export default async function LeadsSection({
   else currentTabQuery = currentTabQuery.order("created_at", { ascending: false });
 
   const { data: leadsData } = await currentTabQuery;
-  const leads = (leadsData ?? []) as Lead[];
+  // In event context, the "Active" toggle/badge must reflect this event's
+  // own event_leads.is_active_lead flag, not the master lead's — otherwise
+  // a lead marked active elsewhere would show (and sort) as active here too.
+  const leads = isEventView
+    ? ((leadsData ?? []) as Lead[]).map((l) => ({ ...l, is_active_lead: eventActiveLeadIds.includes(l.id) }))
+    : ((leadsData ?? []) as Lead[]);
   const savedFilters = savedFiltersData;
 
   const exportIds = leads.map((l) => l.id).join(",");
@@ -425,7 +449,7 @@ export default async function LeadsSection({
           </div>
         </FiltersPanel>
 
-        <LeadsTableBulk leads={leads} columns={columns} />
+        <LeadsTableBulk leads={leads} columns={columns} eventId={eventId} />
       </div>
     </div>
   );

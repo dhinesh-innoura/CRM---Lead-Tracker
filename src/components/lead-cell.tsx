@@ -6,7 +6,15 @@ import StatusSelect from "@/components/status-select";
 import HoldReasonIcon from "@/components/hold-reason-icon";
 import ActiveToggleButton from "@/components/active-toggle-button";
 
-export default function LeadCell({ lead, columnKey }: { lead: Lead; columnKey: string }) {
+export default function LeadCell({
+  lead,
+  columnKey,
+  eventId,
+}: {
+  lead: Lead;
+  columnKey: string;
+  eventId?: string;
+}) {
   if (columnKey.startsWith("custom:")) {
     const fieldKey = columnKey.slice("custom:".length);
     return <EditableCell leadId={lead.id} fieldKey={fieldKey} initialValue={lead.custom_fields?.[fieldKey] ?? ""} />;
@@ -90,7 +98,7 @@ export default function LeadCell({ lead, columnKey }: { lead: Lead; columnKey: s
     case "notes":
       return <LeadFieldCell leadId={lead.id} field="notes" initialValue={lead.notes ?? ""} multiline />;
     case "action":
-      return <ActiveToggleButton leadId={lead.id} isActive={lead.is_active_lead} />;
+      return <ActiveToggleButton leadId={lead.id} isActive={lead.is_active_lead} eventId={eventId} />;
     default:
       return <span className="text-gray-400">—</span>;
   }
