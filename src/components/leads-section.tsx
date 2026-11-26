@@ -151,10 +151,17 @@ export default async function LeadsSection({
   }
 
   // New Leads: no status yet, OR status was first set earlier today — keeps
-  // today's in-progress batch together until the day rolls over.
+  // today's in-progress batch together until the day rolls over. A lead
+  // marked active must disappear from here immediately (move straight to
+  // Active Leads) even if it never got a status — Mark Active is its own
+  // explicit "move this lead" action, not something that waits for the
+  // status pipeline.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function applyNewTabFilter(query: any): any {
-    return query.or(
+    const q2 = isEventView
+      ? query.not("id", "in", `(${(eventActiveLeadIds.length > 0 ? eventActiveLeadIds : [NO_MATCH_ID]).join(",")})`)
+      : query.eq("is_active_lead", false);
+    return q2.or(
       `status.is.null,and(first_status_at.gte.${startOfToday},first_status_at.lt.${startOfTomorrow})`
     );
   }
