@@ -106,13 +106,27 @@ export default function ImportClient({
     setResult(null);
 
     const buf = await file.arrayBuffer();
-    const wb = XLSX.read(buf, { type: "array" });
+    // cellDates so a real Excel date cell comes through as a JS Date object
+    // instead of its internal serial number (e.g. 45658) — without this, a
+    // date cell reads as a plain number, which a naive Date() parse turns
+    // into a nonsensical multi-thousand-year date.
+    const wb = XLSX.read(buf, { type: "array", cellDates: true });
     const sheet = wb.Sheets[wb.SheetNames[0]];
-    const json = XLSX.utils.sheet_to_json<Record<string, string>>(sheet, { defval: "" });
+    const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: "" });
+
+    const toCellString = (v: unknown) => {
+      if (v instanceof Date && !Number.isNaN(v.getTime())) {
+        const y = v.getFullYear();
+        const m = String(v.getMonth() + 1).padStart(2, "0");
+        const d = String(v.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+      }
+      return String(v);
+    };
 
     const hdrs = json.length > 0 ? Object.keys(json[0]) : [];
     setHeaders(hdrs);
-    setRows(json.map((r) => Object.fromEntries(Object.entries(r).map(([k, v]) => [k, String(v)]))));
+    setRows(json.map((r) => Object.fromEntries(Object.entries(r).map(([k, v]) => [k, toCellString(v)]))));
     setMapping(guessMapping(hdrs));
   }
 

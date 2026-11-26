@@ -19,9 +19,26 @@ const VALID_SOURCES: LeadSource[] = ["linkedin", "prem_sir", "ai"];
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function parseDateOrNull(value: string): string | null {
-  if (!value.trim()) return null;
-  const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+
+  // Already a clean yyyy-mm-dd (what the Excel reader now produces for date
+  // cells) — use it directly rather than round-tripping through Date, which
+  // can't be trusted not to shift the day across a timezone boundary.
+  const isoMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (isoMatch) {
+    const year = Number(isoMatch[1]);
+    return year >= 1900 && year <= 2200 ? `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}` : null;
+  }
+
+  const d = new Date(trimmed);
+  if (Number.isNaN(d.getTime())) return null;
+  // A garbage/misread value (e.g. a raw Excel date serial parsed as a bare
+  // number) produces a wildly out-of-range year that Postgres' date type
+  // rejects outright — treat it as unparseable instead of erroring the row.
+  const year = d.getFullYear();
+  if (year < 1900 || year > 2200) return null;
+  return d.toISOString().slice(0, 10);
 }
 
 export async function importLeads(
