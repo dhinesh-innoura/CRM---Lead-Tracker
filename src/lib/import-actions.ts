@@ -233,7 +233,8 @@ export async function importLeads(
 
   revalidatePath("/leads");
   revalidatePath("/leads/sir-given");
-  revalidatePath("/events", "layout");
+  revalidatePath("/events");
+  revalidatePath("/events/[id]", "layout");
   revalidatePath("/");
 
   return result;

@@ -10,11 +10,23 @@ import type { LeadPriority, LeadSource, LeadStatus } from "@/lib/supabase/types"
 // lead's status/assignment/activity must refresh all of them together —
 // otherwise a tab can show stale data until Next's cache happens to expire
 // on its own, which looks like the change only "took effect the next day".
+//
+// `/events/[id]` is a DYNAMIC route with no layout.tsx of its own, so
+// `revalidatePath("/events", "layout")` never actually reached it — there's
+// no layout file at that literal path for Next to invalidate. That silently
+// left every individual event page on stale data after any lead action
+// (delete, mark active, import...), which is why the same handful of event
+// page bugs kept resurfacing after each "fix": the underlying fix was
+// correct, but the already-open event page never saw the new data without a
+// hard refresh. Revalidating the literal `/events/[id]` pattern (Next's
+// documented syntax for targeting every page matching a dynamic route) is
+// what actually invalidates it.
 function revalidateLeadPaths(leadId?: string) {
   if (leadId) revalidatePath(`/leads/${leadId}`);
   revalidatePath("/leads");
   revalidatePath("/leads/sir-given");
-  revalidatePath("/events", "layout");
+  revalidatePath("/events");
+  revalidatePath("/events/[id]", "layout");
   revalidatePath("/");
 }
 
@@ -65,7 +77,8 @@ export async function createLead(formData: FormData) {
 
   revalidatePath("/leads");
   revalidatePath("/leads/sir-given");
-  revalidatePath("/events", "layout");
+  revalidatePath("/events");
+  revalidatePath("/events/[id]", "layout");
   revalidatePath("/");
   redirect(`/leads/${data.id}`);
 }
@@ -280,7 +293,8 @@ export async function deleteSavedFilter(id: string) {
   if (error) throw new Error(error.message);
   revalidatePath("/leads");
   revalidatePath("/leads/sir-given");
-  revalidatePath("/events", "layout");
+  revalidatePath("/events");
+  revalidatePath("/events/[id]", "layout");
 }
 
 export async function saveColumnPrefs(
@@ -477,7 +491,8 @@ export async function createLeadsManually(
 
   revalidatePath("/leads");
   revalidatePath("/leads/sir-given");
-  revalidatePath("/events", "layout");
+  revalidatePath("/events");
+  revalidatePath("/events/[id]", "layout");
 }
 
 export async function deleteLead(leadId: string, eventId?: string) {
@@ -494,7 +509,8 @@ export async function deleteLead(leadId: string, eventId?: string) {
   }
   revalidatePath("/leads");
   revalidatePath("/leads/sir-given");
-  revalidatePath("/events", "layout");
+  revalidatePath("/events");
+  revalidatePath("/events/[id]", "layout");
 }
 
 export async function deleteLeads(leadIds: string[], eventId?: string) {
@@ -509,7 +525,8 @@ export async function deleteLeads(leadIds: string[], eventId?: string) {
   }
   revalidatePath("/leads");
   revalidatePath("/leads/sir-given");
-  revalidatePath("/events", "layout");
+  revalidatePath("/events");
+  revalidatePath("/events/[id]", "layout");
 }
 
 export async function markAllNotificationsRead() {
