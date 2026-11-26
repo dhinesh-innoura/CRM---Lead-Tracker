@@ -68,12 +68,11 @@ export async function importLeads(
       continue;
     }
 
-    const contactEmail = get("contact_email");
-    if (contactEmail && !EMAIL_RE.test(contactEmail)) {
-      result.errorRows++;
-      result.errors.push({ row: i + 1, message: `Invalid email: ${contactEmail}` });
-      continue;
-    }
+    // Email is only used for duplicate detection, not required data — a bad
+    // value (scraped placeholder text, "Not publicly verified", etc.)
+    // shouldn't block the whole row from importing. Just drop it.
+    const contactEmailRaw = get("contact_email");
+    const contactEmail = contactEmailRaw && EMAIL_RE.test(contactEmailRaw) ? contactEmailRaw : "";
 
     const existingId =
       byCompany.get(companyName.toLowerCase()) ||
