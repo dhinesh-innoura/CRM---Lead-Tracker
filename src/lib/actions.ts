@@ -257,7 +257,7 @@ export async function bulkUpdateAssignment(leadIds: string[], assignedTo: string
   revalidateLeadPaths();
 }
 
-export async function saveFilter(name: string, query: Record<string, string>) {
+export async function saveFilter(name: string, query: Record<string, string>, scope: string) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -268,9 +268,10 @@ export async function saveFilter(name: string, query: Record<string, string>) {
     name,
     owner_id: user.id,
     query,
+    scope,
   });
   if (error) throw new Error(error.message);
-  revalidatePath("/leads");
+  revalidatePath(scope);
 }
 
 export async function deleteSavedFilter(id: string) {
@@ -278,9 +279,14 @@ export async function deleteSavedFilter(id: string) {
   const { error } = await supabase.from("saved_filters").delete().eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/leads");
+  revalidatePath("/leads/sir-given");
+  revalidatePath("/events", "layout");
 }
 
-export async function saveColumnPrefs(columns: { key: string; label: string; visible: boolean; custom?: boolean }[]) {
+export async function saveColumnPrefs(
+  columns: { key: string; label: string; visible: boolean; custom?: boolean }[],
+  scope: string
+) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -289,10 +295,10 @@ export async function saveColumnPrefs(columns: { key: string; label: string; vis
 
   const { error } = await supabase
     .from("lead_table_prefs")
-    .upsert({ owner_id: user.id, columns, updated_at: new Date().toISOString() });
+    .upsert({ owner_id: user.id, scope, columns, updated_at: new Date().toISOString() });
   if (error) throw new Error(error.message);
 
-  revalidatePath("/leads");
+  revalidatePath(scope);
 }
 
 function slugifyFieldKey(label: string) {

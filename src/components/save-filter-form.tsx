@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useSearchParams } from "next/navigation";
 import { saveFilter } from "@/lib/actions";
 
-export default function SaveFilterForm() {
+export default function SaveFilterForm({ scope }: { scope: string }) {
   const searchParams = useSearchParams();
   const [name, setName] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -17,7 +17,7 @@ export default function SaveFilterForm() {
         if (!name.trim()) return;
         const query = Object.fromEntries(searchParams.entries());
         startTransition(async () => {
-          await saveFilter(name.trim(), query);
+          await saveFilter(name.trim(), query, scope);
           setSaved(true);
           setName("");
         });

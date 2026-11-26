@@ -10,9 +10,11 @@ import type { LeadFieldDef } from "@/lib/supabase/types";
 export default function ColumnCustomizer({
   columns,
   fieldDefs,
+  scope,
 }: {
   columns: ColumnPref[];
   fieldDefs: LeadFieldDef[];
+  scope: string;
 }) {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<ColumnPref[]>(columns);
@@ -43,7 +45,7 @@ export default function ColumnCustomizer({
   async function handleApply() {
     setSaving(true);
     try {
-      await saveColumnPrefs(draft);
+      await saveColumnPrefs(draft, scope);
       setOpen(false);
     } finally {
       setSaving(false);

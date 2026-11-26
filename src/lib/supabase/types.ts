@@ -174,6 +174,7 @@ export interface SavedFilter {
   name: string;
   owner_id: string;
   query: Record<string, string>;
+  scope: string;
   created_at: string;
 }
 

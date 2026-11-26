@@ -186,11 +186,17 @@ export default async function LeadsSection({
     activeCountRes,
   ] = await Promise.all([
     supabase.from("lead_field_defs").select("*").order("position", { ascending: true }),
-    supabase.from("lead_table_prefs").select("columns").eq("owner_id", user.id).maybeSingle(),
+    supabase
+      .from("lead_table_prefs")
+      .select("columns")
+      .eq("owner_id", user.id)
+      .eq("scope", basePath)
+      .maybeSingle(),
     supabase
       .from("saved_filters")
       .select("*")
       .eq("owner_id", user.id)
+      .eq("scope", basePath)
       .order("created_at", { ascending: false }),
     tabs.includes("new")
       ? applyNewTabFilter(scoped(supabase.from("leads").select("id", { count: "exact", head: true })))
@@ -310,7 +316,7 @@ export default async function LeadsSection({
         </div>
         <div className="flex gap-2">
           <AddColumnForm />
-          <ColumnCustomizer columns={columns} fieldDefs={fieldDefs} />
+          <ColumnCustomizer columns={columns} fieldDefs={fieldDefs} scope={basePath} />
         </div>
       </div>
 
@@ -352,7 +358,7 @@ export default async function LeadsSection({
             {savedFilters && savedFilters.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {(savedFilters as SavedFilter[]).map((f) => (
-                  <SavedFilterChip key={f.id} filter={f} />
+                  <SavedFilterChip key={f.id} filter={f} basePath={basePath} />
                 ))}
               </div>
             )}
@@ -458,7 +464,7 @@ export default async function LeadsSection({
             </form>
 
             <Suspense fallback={null}>
-              <SaveFilterForm />
+              <SaveFilterForm scope={basePath} />
             </Suspense>
           </div>
         </FiltersPanel>
