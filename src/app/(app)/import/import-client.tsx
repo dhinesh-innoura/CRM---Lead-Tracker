@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import * as XLSX from "xlsx";
 import { importLeads, type ImportResult } from "@/lib/import-actions";
+import { createClient } from "@/lib/supabase/client";
 import type { LeadFieldDef, LeadSource } from "@/lib/supabase/types";
 
 const FIELDS: { key: string; label: string; required?: boolean }[] = [
@@ -98,6 +99,7 @@ export default function ImportClient({
   const [onDuplicate, setOnDuplicate] = useState<"skip" | "update">("skip");
   const [result, setResult] = useState<ImportResult | null>(null);
   const [importing, setImporting] = useState(false);
+  const [sessionExpired, setSessionExpired] = useState(false);
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -132,7 +134,21 @@ export default function ImportClient({
 
   async function handleImport() {
     setImporting(true);
+    setSessionExpired(false);
     try {
+      // If this tab has been idle a while, the access token in the cookie
+      // can be stale. getSession() refreshes it (using the long-lived
+      // refresh token) before we submit — without this, a large import on a
+      // stale tab gets silently redirected to /login by middleware and the
+      // whole upload (file + column mapping) is lost with no explanation.
+      const supabase = createClient();
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) {
+        setSessionExpired(true);
+        setImporting(false);
+        return;
+      }
+
       const res = await importLeads(fileName, mapping, rows, onDuplicate, {
         defaultSource,
         defaultStatus,
@@ -251,6 +267,16 @@ export default function ImportClient({
               </tbody>
             </table>
           </div>
+
+          {sessionExpired && (
+            <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+              Your session has expired. Please{" "}
+              <a href="/login" target="_blank" rel="noopener noreferrer" className="font-medium underline">
+                log in again
+              </a>{" "}
+              in the new tab, then come back here and click Import — your file and column mapping are still here.
+            </p>
+          )}
 
           <div className="mt-4 flex items-center gap-4">
             <label className="text-sm text-gray-600">On duplicate (matched by company name or email):</label>
