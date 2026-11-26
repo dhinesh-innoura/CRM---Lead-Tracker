@@ -290,6 +290,7 @@ export default async function LeadsSection({
           defaultSource={sourceFilter?.[0]}
           defaultStatus={tab === "new" ? undefined : "outreach_initiated"}
           assignToSelf={viewMode === "assigned"}
+          forceNewLead={tab === "new"}
         />
         <a
           href={`/api/export/leads?ids=${exportIds}`}

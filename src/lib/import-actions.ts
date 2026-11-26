@@ -34,6 +34,7 @@ export async function importLeads(
     defaultStatus?: string;
     eventId?: string;
     assignToSelf?: boolean;
+    forceNewLead?: boolean;
   }
 ): Promise<ImportResult> {
   const supabase = await createClient();
@@ -83,14 +84,19 @@ export async function importLeads(
       overrides?.defaultSource ??
       ((VALID_SOURCES.includes(sourceRaw as LeadSource) ? sourceRaw : "linkedin") as LeadSource);
 
-    const statusRaw = get("status").toLowerCase().replace(/\s+/g, "_");
-    const defaultStatus =
-      overrides?.defaultStatus && LEAD_STATUSES.includes(overrides.defaultStatus as LeadStatus)
-        ? (overrides.defaultStatus as LeadStatus)
-        : null;
-    const status = (
-      LEAD_STATUSES.includes(statusRaw as LeadStatus) ? statusRaw : defaultStatus
-    ) as LeadStatus | null;
+    // Uploading from the New Leads tab always lands in New Leads: ignore
+    // whatever the file's Status column says, never just fall back to it.
+    let status: LeadStatus | null;
+    if (overrides?.forceNewLead) {
+      status = null;
+    } else {
+      const statusRaw = get("status").toLowerCase().replace(/\s+/g, "_");
+      const defaultStatus =
+        overrides?.defaultStatus && LEAD_STATUSES.includes(overrides.defaultStatus as LeadStatus)
+          ? (overrides.defaultStatus as LeadStatus)
+          : null;
+      status = (LEAD_STATUSES.includes(statusRaw as LeadStatus) ? statusRaw : defaultStatus) as LeadStatus | null;
+    }
 
     const customFields: Record<string, string> = {};
     for (const key of customFieldKeys) {

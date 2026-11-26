@@ -74,6 +74,7 @@ export default function ImportClient({
   defaultStatus,
   eventId,
   assignToSelf,
+  forceNewLead,
   onImported,
 }: {
   fieldDefs?: LeadFieldDef[];
@@ -81,6 +82,7 @@ export default function ImportClient({
   defaultStatus?: string;
   eventId?: string;
   assignToSelf?: boolean;
+  forceNewLead?: boolean;
   onImported?: () => void;
 }) {
   const router = useRouter();
@@ -120,6 +122,7 @@ export default function ImportClient({
       const res = await importLeads(fileName, mapping, rows, onDuplicate, {
         defaultSource,
         defaultStatus,
+        forceNewLead,
         eventId,
         assignToSelf,
       });

@@ -11,12 +11,14 @@ export default function ImportModal({
   defaultStatus,
   eventId,
   assignToSelf,
+  forceNewLead,
 }: {
   fieldDefs: LeadFieldDef[];
   defaultSource?: LeadSource;
   defaultStatus?: string;
   eventId?: string;
   assignToSelf?: boolean;
+  forceNewLead?: boolean;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -42,6 +44,7 @@ export default function ImportModal({
             defaultStatus={defaultStatus}
             eventId={eventId}
             assignToSelf={assignToSelf}
+            forceNewLead={forceNewLead}
             onImported={() => setOpen(false)}
           />
         </Modal>
