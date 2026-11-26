@@ -1,0 +1,80 @@
+- generic [active] [ref=f5e1]:
+  - generic [ref=f5e2]:
+    - complementary [ref=f5e3]:
+      - heading "Tracker360" [level=1] [ref=f5e5]
+      - navigation [ref=f5e6]:
+        - link "Dashboard" [ref=f5e7] [cursor=pointer]:
+          - /url: /
+        - link "Own Leads" [ref=f5e13] [cursor=pointer]:
+          - /url: /leads
+        - link "Assigned Leads" [ref=f5e19] [cursor=pointer]:
+          - /url: /leads/sir-given
+        - link "Event Leads" [ref=f5e25] [cursor=pointer]:
+          - /url: /events
+        - link "Follow-ups" [ref=f5e28] [cursor=pointer]:
+          - /url: /followups
+        - link "Responses" [ref=f5e32] [cursor=pointer]:
+          - /url: /responses
+        - link "Meetings" [ref=f5e35] [cursor=pointer]:
+          - /url: /meetings
+        - link "LinkedIn" [ref=f5e38] [cursor=pointer]:
+          - /url: /linkedin
+        - link "Notifications" [ref=f5e42] [cursor=pointer]:
+          - /url: /notifications
+        - link "Settings" [ref=f5e46] [cursor=pointer]:
+          - /url: /settings
+      - generic [ref=f5e50]:
+        - paragraph [ref=f5e51]: Monica
+        - generic [ref=f5e52]: BDO
+        - button "Sign out" [ref=f5e54]
+        - button "Collapse" [ref=f5e55]
+    - main [ref=f5e58]:
+      - generic [ref=f5e59]:
+        - generic [ref=f5e60]:
+          - heading "Own Leads" [level=1] [ref=f5e61]
+          - paragraph [ref=f5e62]: Leads owned by you (created or sourced directly).
+        - generic [ref=f5e63]:
+          - generic [ref=f5e64]:
+            - link "New Leads (34)" [ref=f5e65] [cursor=pointer]:
+              - /url: /leads?tab=new
+            - link "All Leads (10)" [ref=f5e156] [cursor=pointer]:
+              - /url: /leads?tab=all
+            - link "Active Leads (0)" [ref=f5e157] [cursor=pointer]:
+              - /url: /leads?tab=active
+          - generic [ref=f5e68]:
+            - button "+ Add Column" [ref=f5e69]
+            - button "Customize Columns" [ref=f5e70]
+        - generic [ref=f5e74]:
+          - button "+ Add Manually" [ref=f5e75]
+          - button "Import from Excel" [ref=f5e76]
+          - link "Export Active Leads" [ref=f5e77] [cursor=pointer]:
+            - /url: /api/export/leads?ids=
+          - link "Download Excel Template" [ref=f5e78] [cursor=pointer]:
+            - /url: /api/export/template?columns=%5B%22Company%22%2C%22Website%20URL%22%2C%22Outreach%20Date%22%2C%22Last%20Outreach%20Date%22%2C%22Country%22%2C%22Industry%22%2C%22About%20Company%22%2C%22Contact%20Person%22%2C%22LinkedIn%20URL%22%2C%22Business%20Email%22%2C%22About%20Person%22%2C%22Source%22%2C%22Solutions%22%2C%22Products%22%2C%22AiVision360%20Synergy%22%2C%22Status%22%2C%22Applications%22%2C%22Partners%22%2C%22Annual%20Revenue%22%2C%22Priority%22%2C%22Notes%22%5D
+        - generic [ref=f5e79]:
+          - button "Filters" [ref=f5e81]
+          - generic [ref=f5e84]:
+            - button "Remove All" [disabled] [ref=f5e86]
+            - table [ref=f5e88]:
+              - rowgroup [ref=f5e89]:
+                - row [ref=f5e90]:
+                  - columnheader [ref=f5e91]:
+                    - checkbox [ref=f5e92]
+                  - columnheader "S.No" [ref=f5e93]
+                  - columnheader "Company" [ref=f5e94]
+                  - columnheader "Outreach Date" [ref=f5e95]
+                  - columnheader "Last Outreach Date" [ref=f5e96]
+                  - columnheader "Contact Person" [ref=f5e97]
+                  - columnheader "LinkedIn URL" [ref=f5e98]
+                  - columnheader "About Person" [ref=f5e99]
+                  - columnheader "Source" [ref=f5e100]
+                  - columnheader "AiVision360 Synergy" [ref=f5e101]
+                  - columnheader "Status" [ref=f5e102]
+                  - columnheader "Notes" [ref=f5e103]
+                  - columnheader "Action" [ref=f5e104]
+                  - columnheader [ref=f5e105]
+              - rowgroup [ref=f5e106]:
+                - row [ref=f5e158]:
+                  - cell "No leads found." [ref=f5e159]
+  - button "Open Next.js Dev Tools" [ref=f5e151] [cursor=pointer]
+  - alert [ref=f5e155]

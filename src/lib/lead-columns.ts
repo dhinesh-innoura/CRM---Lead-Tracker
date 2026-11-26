@@ -5,6 +5,12 @@ import type { LeadFieldDef } from "@/lib/supabase/types";
 // mergeColumnPrefs) and excluded from drag/hide in the column customizer.
 export const LOCKED_COLUMN_KEYS = ["outreach_date", "last_outreach_date"];
 
+// The Action column holds the "Mark Active" button — it's not a data field,
+// it's the only way to move a lead into Active Leads. It stays visible and
+// un-hideable like the locked columns above, but (unlike them) keeps its
+// normal position at the end of the table instead of being pinned to 3rd/4th.
+const ALWAYS_VISIBLE_KEYS = ["action"];
+
 // Columns that exist and can be turned on via Customize Columns / included in
 // exports, but shouldn't clutter the table by default.
 const DEFAULT_HIDDEN_KEYS = ["company_website", "country", "industry", "contact_email", "priority", "notes"];
@@ -31,7 +37,7 @@ export const FIXED_COLUMNS: { key: string; label: string; locked?: boolean }[] =
   { key: "annual_revenue", label: "Annual Revenue" },
   { key: "priority", label: "Priority" },
   { key: "notes", label: "Notes" },
-  { key: "action", label: "Action" },
+  { key: "action", label: "Action", locked: true },
 ];
 
 const LOCKED_POSITION = 2; // 0-indexed: locked columns always land at 3rd/4th place
@@ -53,7 +59,14 @@ function pinLockedColumns(columns: ColumnPref[]): ColumnPref[] {
 
   const rest = columns.filter((c) => !LOCKED_COLUMN_KEYS.includes(c.key));
   rest.splice(LOCKED_POSITION, 0, ...locked);
-  return rest;
+
+  // Force always-visible columns back on regardless of what a saved
+  // preference says — e.g. a lead hidden here previously had no other way
+  // to be marked active, since this column is the only place that button
+  // lives.
+  return rest.map((c) =>
+    ALWAYS_VISIBLE_KEYS.includes(c.key) ? { ...c, visible: true, locked: true } : c
+  );
 }
 
 export function buildDefaultColumns(fieldDefs: LeadFieldDef[]): ColumnPref[] {
