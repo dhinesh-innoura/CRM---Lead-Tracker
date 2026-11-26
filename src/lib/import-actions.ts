@@ -164,6 +164,16 @@ export async function importLeads(
       }
 
       if (onDuplicate === "skip") {
+        // "Skip" means don't overwrite data the team may have already
+        // entered on the existing lead — but it shouldn't leave the lead
+        // stuck in New forever just because this upload happened to match
+        // an existing company name. If nobody has set a status yet, still
+        // apply this upload's tab (e.g. uploading into "All" should move an
+        // untouched lead out of New), without touching one already in
+        // progress.
+        if (status !== null) {
+          await supabase.from("leads").update({ status }).eq("id", existingId).is("status", null);
+        }
         result.skippedRows++;
         continue;
       }
