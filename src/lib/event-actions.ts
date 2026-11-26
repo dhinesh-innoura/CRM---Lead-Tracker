@@ -45,3 +45,12 @@ export async function deleteEvent(eventId: string) {
   revalidatePath("/leads");
   revalidatePath("/leads/sir-given");
 }
+
+export async function deleteAllEvents() {
+  const supabase = await createClient();
+  const { error } = await supabase.from("events").delete().not("id", "is", null);
+  if (error) throw new Error(error.message);
+  revalidatePath("/events");
+  revalidatePath("/leads");
+  revalidatePath("/leads/sir-given");
+}

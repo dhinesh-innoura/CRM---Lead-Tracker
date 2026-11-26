@@ -1,6 +1,7 @@
 import { requireUser } from "@/lib/data";
 import AddEventModal from "@/components/add-event-modal";
 import EventCard from "@/components/event-card";
+import RemoveAllEventsButton from "@/components/remove-all-events-button";
 import type { LeadEvent } from "@/lib/supabase/types";
 
 export default async function EventsPage() {
@@ -47,7 +48,10 @@ export default async function EventsPage() {
             Events and exhibitions management. Click an event to view its New Leads, All Leads, and Active Leads.
           </p>
         </div>
-        <AddEventModal />
+        <div className="flex items-center gap-2">
+          <AddEventModal />
+          <RemoveAllEventsButton count={events.length} />
+        </div>
       </div>
 
       {events.length === 0 ? (
