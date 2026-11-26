@@ -63,9 +63,20 @@ export async function importLeads(
 
   const { data: existing } = await supabase
     .from("leads")
-    .select("id, company_name, contact_email");
+    .select("id, company_name, contact_name, contact_email");
 
-  const byCompany = new Map((existing ?? []).map((l) => [l.company_name?.toLowerCase(), l.id]));
+  // This CRM deliberately has multiple leads per company — one per contact
+  // (e.g. "Bahri Logistics" legitimately has several separate leads, one for
+  // each decision-maker). Matching on company name alone collapsed every
+  // contact at a company down to a single existing lead: re-importing a
+  // company's other contacts silently "skipped" them as duplicates of
+  // whichever one happened to be last in the map, so real data from other
+  // rows was lost and never showed up. Match on company+contact together
+  // instead, so only a genuinely repeated company/contact pair counts as a
+  // duplicate.
+  const byCompanyContact = new Map(
+    (existing ?? []).map((l) => [`${l.company_name?.toLowerCase()}|${l.contact_name?.toLowerCase() ?? ""}`, l.id])
+  );
   const byEmail = new Map(
     (existing ?? []).filter((l) => l.contact_email).map((l) => [l.contact_email!.toLowerCase(), l.id])
   );
@@ -91,9 +102,10 @@ export async function importLeads(
     // shouldn't block the whole row from importing. Just drop it.
     const contactEmailRaw = get("contact_email");
     const contactEmail = contactEmailRaw && EMAIL_RE.test(contactEmailRaw) ? contactEmailRaw : "";
+    const contactName = get("contact_name");
 
     const existingId =
-      byCompany.get(companyName.toLowerCase()) ||
+      byCompanyContact.get(`${companyName.toLowerCase()}|${contactName.toLowerCase()}`) ||
       (contactEmail ? byEmail.get(contactEmail.toLowerCase()) : undefined);
 
     const sourceRaw = get("source").toLowerCase().replace(/\s+/g, "_");
@@ -130,7 +142,7 @@ export async function importLeads(
       about_company: get("about_company") || null,
       outreach_date: parseDateOrNull(get("outreach_date")),
       last_outreach_date: parseDateOrNull(get("last_outreach_date")),
-      contact_name: get("contact_name") || null,
+      contact_name: contactName || null,
       contact_linkedin_url: get("contact_linkedin_url") || null,
       about_person: get("about_person") || null,
       solutions: get("solutions") || null,
