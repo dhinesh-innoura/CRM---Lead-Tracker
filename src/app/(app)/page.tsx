@@ -32,7 +32,11 @@ export default async function DashboardPage() {
   // Assigned Leads bucket, not Own Leads, even if you're also the owner —
   // otherwise self-assigning a lead you added would double-count it.
   const ownLeads = all.filter(
-    (l) => (l.owner_id === user.id || (!l.owner_id && l.created_by === user.id)) && !l.assigned_to
+    (l) =>
+      (l.owner_id === user.id || (!l.owner_id && l.created_by === user.id)) &&
+      !l.assigned_to &&
+      !l.event_id &&
+      !eventLeadIdSet.has(l.id)
   );
   const assignedLeads = all.filter((l) => l.assigned_to === user.id);
   const eventLeads = all.filter((l) => l.event_id || eventLeadIdSet.has(l.id));

@@ -104,6 +104,16 @@ export default async function LeadsSection({
   // to an id that can never match a real lead.
   const NO_MATCH_ID = "00000000-0000-0000-0000-000000000000";
 
+  // Own Leads must exclude any lead linked to an event — those leads belong
+  // to their Event Leads page instead, even though uploading/adding them
+  // there also sets owner_id to whoever did it (so they'd otherwise match
+  // the "own" filter below too and show up in both places).
+  let eventLinkedLeadIds: string[] = [];
+  if (viewMode === "own") {
+    const { data: allEventLeadRows } = await supabase.from("event_leads").select("lead_id");
+    eventLinkedLeadIds = (allEventLeadRows ?? []).map((r) => r.lead_id);
+  }
+
   // Scoping helper to filter master leads based on section logic
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function scoped(query: any): any {
@@ -116,7 +126,11 @@ export default async function LeadsSection({
       // are also the owner (e.g. you added it from the Assigned Leads tab).
       q2 = q2
         .or(`owner_id.eq.${user.id},and(owner_id.is.null,created_by.eq.${user.id})`)
-        .is("assigned_to", null);
+        .is("assigned_to", null)
+        .is("event_id", null);
+      if (eventLinkedLeadIds.length > 0) {
+        q2 = q2.not("id", "in", `(${eventLinkedLeadIds.join(",")})`);
+      }
     } else if (viewMode === "assigned") {
       // Assigned Leads: assigned_to equals logged in user
       q2 = q2.eq("assigned_to", user.id);
