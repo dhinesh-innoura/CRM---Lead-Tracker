@@ -9,6 +9,7 @@ import ColumnCustomizer from "@/components/column-customizer";
 import ImportModal from "@/components/import-modal";
 import AddLeadModal from "@/components/add-lead-modal";
 import FiltersPanel from "@/components/filters-panel";
+import ApplyFiltersButton from "@/components/apply-filters-button";
 import { mergeColumnPrefs, type ColumnPref } from "@/lib/lead-columns";
 import {
   LEAD_SOURCES,
@@ -465,9 +466,7 @@ export default async function LeadsSection({
                 title="Created to"
                 className="rounded-lg border border-gray-300 px-2 py-2 text-sm"
               />
-              <button className="col-span-2 rounded-lg bg-[var(--brand)] px-4 py-2 text-sm font-medium text-white hover:opacity-90 lg:col-span-1">
-                Apply
-              </button>
+              <ApplyFiltersButton />
             </form>
 
             <Suspense fallback={null}>
