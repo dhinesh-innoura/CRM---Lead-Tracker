@@ -24,9 +24,29 @@ export default function AddEventModal() {
           onClose={() => setOpen(false)}
         >
           <form
-            action={(formData) => {
+            onSubmit={async (e) => {
+              // A <form action={fn}> submission runs inside React's own
+              // transition, which batches our setSaving(true) together with
+              // createEvent's async work and the redirect() at the end of
+              // it — so the pending state never actually painted before the
+              // page navigated away. A plain onSubmit handler (like every
+              // other modal in this app already uses) updates state
+              // immediately, outside that transition.
+              e.preventDefault();
               setSaving(true);
-              createEvent(formData);
+              const formData = new FormData(e.currentTarget);
+              try {
+                await createEvent(formData);
+              } catch (err) {
+                // redirect() throws a special digest-tagged error on success
+                // to trigger navigation — only a real failure should
+                // re-enable the form.
+                const digest = (err as { digest?: string })?.digest;
+                if (!digest?.startsWith("NEXT_REDIRECT")) {
+                  setSaving(false);
+                }
+                throw err;
+              }
             }}
             className="space-y-3"
           >
