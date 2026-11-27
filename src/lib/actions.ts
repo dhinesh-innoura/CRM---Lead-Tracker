@@ -500,9 +500,22 @@ export async function deleteLead(leadId: string, eventId?: string) {
   // On an Event Leads page, "Remove" only unlinks the lead from this event —
   // it must not delete the shared master lead, which would also wipe it out
   // of Own/Assigned Leads and any other event it's linked to.
+  //
+  // A lead is matched to an event two ways: a row in `event_leads`, OR
+  // `leads.event_id` set directly on the master row (set at creation time by
+  // Add Manually / Import). Deleting only the `event_leads` row left
+  // `leads.event_id` untouched, so the lead kept matching the event's query
+  // forever — "Remove" looked like it silently did nothing. Both have to be
+  // cleared.
   if (eventId) {
     const { error } = await supabase.from("event_leads").delete().eq("event_id", eventId).eq("lead_id", leadId);
     if (error) throw new Error(error.message);
+    const { error: clearError } = await supabase
+      .from("leads")
+      .update({ event_id: null })
+      .eq("id", leadId)
+      .eq("event_id", eventId);
+    if (clearError) throw new Error(clearError.message);
   } else {
     const { error } = await supabase.from("leads").delete().eq("id", leadId);
     if (error) throw new Error(error.message);
@@ -519,6 +532,12 @@ export async function deleteLeads(leadIds: string[], eventId?: string) {
   if (eventId) {
     const { error } = await supabase.from("event_leads").delete().eq("event_id", eventId).in("lead_id", leadIds);
     if (error) throw new Error(error.message);
+    const { error: clearError } = await supabase
+      .from("leads")
+      .update({ event_id: null })
+      .in("id", leadIds)
+      .eq("event_id", eventId);
+    if (clearError) throw new Error(clearError.message);
   } else {
     const { error } = await supabase.from("leads").delete().in("id", leadIds);
     if (error) throw new Error(error.message);
